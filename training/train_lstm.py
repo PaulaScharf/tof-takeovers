@@ -26,7 +26,7 @@ model.add(Dense(1, activation='sigmoid'))  # Sigmoid-Aktivierung für binäre Kl
 
 tf.keras.utils.plot_model(
     model,
-    to_file='model.png',
+    to_file='model_lstm.png',
 	show_shapes=True,
 )
 
@@ -64,7 +64,7 @@ def save_tflite_model(tflite_model, save_dir, model_name):
      
 tflite_model = convert_tflite_model(model)
 
-save_tflite_model(tflite_model, 'model', 'overtake_model.tflite')
-model.save_weights('./model/overtake_model')
+save_tflite_model(tflite_model, 'model', 'model_lstm.tflite')
+model.save_weights('./model/model_lstm')
 # after converting to tflite convert it to tflite for micro with the following:
-# xxd -i overtake_model.tflite > overtake_model_data.cc
+# xxd -i model_lstm.tflite > model_lstm.cc
