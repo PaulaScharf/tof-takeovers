@@ -1,0 +1,1 @@
+# Here I would implement training a model with cnn layers instead of lstm
