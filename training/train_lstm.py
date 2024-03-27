@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 
-data_path = "./trainingsdata/traintestval/"
+data_path = "./training/trainingsdata/traintestval/"
 
 # This data is for training the model
 with open(data_path + 'train_data.pkl', 'rb') as file:
@@ -25,7 +25,7 @@ model.add(Dense(1, activation='sigmoid')) # Sigmoid-Aktivierung für binäre Kla
 
 tf.keras.utils.plot_model(
     model,
-    to_file='model_lstm.png',
+    to_file='training/model_lstm.png',
 	show_shapes=True,
 )
 
@@ -44,7 +44,7 @@ metrics = model.evaluate(X_test, y_test, return_dict=True)
 print(metrics)
 
 # Model speichern
-model.save('model.keras')
+model.save('training/models/model.keras')
 
 # Convert model to tflite
 def convert_tflite_model(model):
@@ -64,8 +64,8 @@ def save_tflite_model(tflite_model, save_dir, model_name):
      
 tflite_model = convert_tflite_model(model)
 
-save_tflite_model(tflite_model, 'model', 'model_lstm.tflite')
-model.save_weights('./models/model_lstm')
+save_tflite_model(tflite_model, './training/models', 'model_lstm.tflite')
+model.save_weights('./training/models/model_lstm')
 
 # after converting to tflite convert it to tflite for micro with the following:
 # xxd -i models/model_lstm.tflite > models/model_lstm.cc
