@@ -40,9 +40,6 @@ File file;
 String dataStr = "";
 
 void print_result(VL53L8CX_ResultsData *Result);
-void clear_screen(void);
-void handle_cmd(uint8_t cmd);
-void display_commands_banner(void);
 
 long measurements = 0;         // Used to calculate actual output rate
 long measurementStartTime = 0;
@@ -50,26 +47,18 @@ long measurementStartTime = 0;
 // Components.
 VL53L8CX sensor_vl53l8cx_top(&DEV_I2C, LPN_PIN, I2C_RST_PIN);
 
-bool EnableAmbient = false;
-bool EnableSignal = false;
+bool EnableAmbient = true;
+bool EnableSignal = true;
 uint8_t res = VL53L8CX_RESOLUTION_4X4;
 char report[256];
 int start = 0;
 
-
-void receiveEvent(int bytes) {
-  Serial.print("received: ");
-  start = Wire.read();    // read one character from the I2C
-  Serial.println(start);
-}
-
-/* Setup ---------------------------------------------------------------------*/
 void setup()
 {
   // Initialize serial for output.
   Serial.begin(9600);
   // delay(2000);
- // while(!Serial) ;
+  // while(!Serial) ;
 
   uint8_t status;
 
@@ -111,8 +100,9 @@ void setup()
   // Start Measurements
   sensor_vl53l8cx_top.vl53l8cx_start_ranging();
 
-  toggle_resolution();
-  toggle_signal_and_ambient();
+  
+  sensor_vl53l8cx_top.vl53l8cx_set_resolution(VL53L8CX_RESOLUTION_8X8);
+  sensor_vl53l8cx_top.vl53l8cx_start_ranging();
 
   Serial.println("Success");
 }
@@ -169,75 +159,4 @@ void print_result(VL53L8CX_ResultsData *Result)
   }
   dataStr += "\n";
   Serial.print(dataStr);
-}
-
-void toggle_resolution(void)
-{
-  sensor_vl53l8cx_top.vl53l8cx_stop_ranging();
-
-  switch (res)
-  {
-    case VL53L8CX_RESOLUTION_4X4:
-      res = VL53L8CX_RESOLUTION_8X8;
-      break;
-
-    case VL53L8CX_RESOLUTION_8X8:
-      res = VL53L8CX_RESOLUTION_4X4;
-      break;
-
-    default:
-      break;
-  }
-  sensor_vl53l8cx_top.vl53l8cx_set_resolution(res);
-  sensor_vl53l8cx_top.vl53l8cx_start_ranging();
-}
-
-void toggle_signal_and_ambient(void)
-{
-  EnableAmbient = (EnableAmbient) ? false : true;
-  EnableSignal = (EnableSignal) ? false : true;
-}
-
-void clear_screen(void)
-{
-  snprintf(report, sizeof(report),"%c[2J", 27); /* 27 is ESC command */
-  SerialPort.print(report);
-}
-
-void display_commands_banner(void)
-{
-  snprintf(report, sizeof(report),"%c[2H", 27); /* 27 is ESC command */
-  SerialPort.print(report);
-
-  Serial.print("53L7A1 Simple Ranging demo application\n");
-  Serial.print("--------------------------------------\n\n");
-
-  Serial.print("Use the following keys to control application\n");
-  Serial.print(" 'r' : change resolution\n");
-  Serial.print(" 's' : enable signal and ambient\n");
-  Serial.print(" 'c' : clear screen\n");
-  Serial.print("\n");
-}
-
-void handle_cmd(uint8_t cmd)
-{
-  switch (cmd)
-  {
-    case 'r':
-      toggle_resolution();
-      clear_screen();
-      break;
-
-    case 's':
-      toggle_signal_and_ambient();
-      clear_screen();
-      break;
-
-    case 'c':
-      clear_screen();
-      break;
-
-    default:
-      break;
-  }
 }
