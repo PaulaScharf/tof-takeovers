@@ -4,7 +4,9 @@ Use the `label_csv.py` to label the csv files according to given timestamps (giv
 ---
 
 ## Training the model
-Use either `train_lstm.py` or `train_cnn.py` to train a model with the pkl files from the previous step.
+Use either `train_lstm.py` or `train_cnn.py` to train a model with the pkl files from the previous step. To turn the resulting trained tflite model into an array of bytes for running it on a microcontroller use the following command:
+
+`xxd -i models/model_lstm.tflite > models/model_lstm.cc` or `xxd -i models/model_cnn.tflite > models/model_cnn.cc`
 
 The lstm model is structured as follows:
 
