@@ -1,4 +1,3 @@
-# TODO: refactor this code
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -41,9 +40,9 @@ X = data_balanced.iloc[:, :-2].values
 y = data_balanced.iloc[:, -1].values
 
 
-# Daten normalisieren
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
+# TODO: Luca normalised the data in his code. Why?? Do we need to do that?
+# scaler = StandardScaler()
+# X = scaler.fit_transform(X)
 
 # Daten in das erforderliche Format umwandeln
 X = X.reshape((-1, 20, 64))

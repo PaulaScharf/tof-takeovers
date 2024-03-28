@@ -1,8 +1,6 @@
 import pickle
 import tensorflow as tf
 import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
 
 data_path = "./training/trainingsdata/traintestval/"
 
