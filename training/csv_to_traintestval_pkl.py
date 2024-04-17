@@ -7,6 +7,8 @@ import pickle
 print("Erzeugen der Datensplits...")
 
 labeled_datasets_paths = [
+    './training/trainingsdata/labeled/stadtlohnweg_autos/stadtlohnweg_autos_1.csv',
+    './training/trainingsdata/labeled/stadtlohnweg_autos/stadtlohnweg_autos_2.csv',
     './training/trainingsdata/labeled/Fahrraeder_Promenade/Fahrraeder.csv',
     './training/trainingsdata/labeled/Fahrraeder_Promenade/Fahrraeder_reversed.csv',
     './training/trainingsdata/labeled/Fahrraeder_Promenade/Fahrraeder_rotated_90.csv',
@@ -17,13 +19,13 @@ labeled_datasets_paths = [
 # Einladen der Daten
 data = []
 for path in labeled_datasets_paths:
-    temp = pd.read_csv(labeled_datasets_paths[0])
+    temp = pd.read_csv(path)
     temp['Timestamp'] = pd.to_datetime(temp['Timestamp'], format='%H:%M:%S.%f', errors="coerce").fillna(pd.to_datetime(temp['Timestamp'], format='%H:%M:%S', errors="coerce"))
     temp['Timestamp'] = temp['Timestamp'].dt.time
     if len(data) == 0:
         data = temp
     else:
-        pd.concat([data,temp])
+        data = pd.concat([data,temp])
 
 # Optional: Unter-Sampling der überrepräsentierten Klasse
 class_0 = data[data['Label'] == 0]
@@ -31,7 +33,7 @@ class_1 = data[data['Label'] == 1]
 
 n_class_1 = len(class_1)
 class_0_sample = class_0.sample(n_class_1)
-data_balanced = data # pd.concat([class_0_sample, class_1])
+data_balanced = pd.concat([class_0_sample, class_1])
 
 
 

@@ -17,6 +17,10 @@ model.load_weights('./training/models/model_lstm')
 metrics = model.evaluate(X_test, y_test, return_dict=True)
 print(metrics)
 
+print("confusion matrix for >60% probability")
+confusion = tf.math.confusion_matrix(labels=y_test, predictions=[1 if x > 0.6 else 0 for x in model(X_test)], num_classes=2)
+print(confusion)
+
 ######################################## TFLITE ###################################
 # Load the TensorFlow Lite model
 interpreter = tf.lite.Interpreter(model_path='./training/models/model_lstm.tflite')

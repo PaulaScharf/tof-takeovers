@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 import numpy as np
 
-to_reverse = True
+to_reverse = False
 to_rotate_90 = False
 to_rotate_270 = False
 
@@ -186,12 +186,55 @@ time_pairs_reverse = [
         ("11:52:56.768","11:52:57.415"),
     ]
 
-data = pd.read_csv('./trainingsdaten/unlabeled/Fahrraeder.csv')
+time_pairs_stadtlohnweg_autos = [ 
+    # stadtlohnweg_autos_1
+    ("12:56:36.859","12:56:37.065"),
+    ("12:56:39.958","12:56:40.355"),
+    ("12:56:47.355","12:56:47.577"),
+    ("12:56:50.655","12:56:50.785"),
+    ("12:56:53.559","12:56:53.622"),
+    ("12:56:55.603","12:56:56.071"),
+    ("12:56:57.914","12:56:57.176"),
+    ("12:56:59.762","12:57:00.223"),
+    ("12:57:02.138","12:57:02.533"),
+    ("12:57:04.055","12:57:04.315"),
+    ("12:57:42.999","12:57:43.331"),
+    ("12:57:44.060","12:57:44.253"),
+    ("12:57:45.773","12:57:45.903"),
+    ("12:57:51.713","12:57:51.779"),
+    # stadtlohnweg_autos_2
+    ("13:00:39.962","13:00:39.962"),
+    ("13:00:42.335","13:00:42.335"),
+    ("13:00:43.325","13:00:43.596"),
+    ("13:00:52.371","13:00:52.503"),
+    ("13:00:56.989","13:00:57.121"),
+    ("13:01:00.620","13:01:00.886"),
+    ("13:01:04.118","13:01:04.184"),
+    ("13:01:15.013","13:01:15.208"), # maybe this is too long?
+    ("13:01:16.403","13:01:16.926"), # spotty
+    ("13:01:18.048","13:01:18.144"),
+    ("13:01:20.688","13:01:20.756"),
+    ("13:01:33.692","13:01:33.825"),
+    ("13:01:34.815","13:01:35.145"),
+    ("13:01:37.256","13:01:37.856"),
+    ("13:01:43.332","13:01:44.188"),
+    ("13:01:47.027","13:01:47.165"),
+    ("13:01:49.668","13:01:49.800"),
+    ("13:01:53.695","13:01:53.961"),
+    ("13:01:55.410","13:01:55.874"),
+    ("13:01:57.593","13:01:57.992"),
+    ("13:01:59.437","13:01:59.773"),
+    ("13:02:01.816","13:02:02.011"),
+    ("13:02:05.840","13:02:06.107"),
+    ("13:02:19.966","13:02:20.237")]
+
+data = pd.read_csv('./training/trainingsdata/unlabeled/stadtlohnweg_autos/stadtlohnweg_autos_2.csv')
     
 data['Timestamp'] = pd.to_datetime(data['Timestamp'], format='%H:%M:%S.%f')
 data['Timestamp'] = data['Timestamp'].dt.time
 
 X = data.iloc[:, :-2].values
+data = data.astype({'Label': 'int32'})
 for index, row in tqdm(data.iterrows(), total=data.shape[0]):
     if to_reverse:
         for j in range(0, len(X[index]), 8): 
@@ -210,7 +253,8 @@ for index, row in tqdm(data.iterrows(), total=data.shape[0]):
             rotated_matrix = np.rot90(original_matrix,3)
             rotated_array = rotated_matrix.flatten()
             X[index][k*64:(k+1)*64] = rotated_array
-    for start, end in time_pairs:
+    data.at[index, 'Label'] = 0
+    for start, end in time_pairs_stadtlohnweg_autos:
         start_datetime = pd.to_datetime(start, format='%H:%M:%S.%f')
 
         
@@ -219,7 +263,7 @@ for index, row in tqdm(data.iterrows(), total=data.shape[0]):
         end_time = end_datetime.time()
     
         # if start_time <= row['Timestamp'] <= end_time:
-        #     data.at[index, 'Label'] = 1
+        #     data.at[index, 'Label'] = 2
         if to_reverse or to_rotate_90 or to_rotate_270:
             if start_time <= row['Timestamp'] <= end_time:
                 data.at[index, 'Label'] = 1
@@ -233,4 +277,4 @@ if to_reverse or to_rotate_90 or to_rotate_270:
     data = data[data['Label'] != 0] 
     data['Label'] = 0
 
-data.to_csv('./trainingsdaten/labeled/Fahrraeder_reversed.csv', encoding='utf-8', index=False)
+data.to_csv('./training/trainingsdata/labeled/stadtlohnweg_autos/stadtlohnweg_autos_2.csv', encoding='utf-8', index=False)
