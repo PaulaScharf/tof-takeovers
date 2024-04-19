@@ -55,8 +55,6 @@ void setLedColorHSV(int h, double s, double v, int x, int y) {
   double g=0; 
   double b=0;
 
-  double hf=h/60.0;
-
   int i=(int)floor(h/60.0);
   double f = h/60.0 - i;
   double pv = v * (1 - s);
@@ -108,7 +106,7 @@ void setLedColorHSV(int h, double s, double v, int x, int y) {
 
 void print_result(VL53L8CX_ResultsData *Result)
 {
-  int8_t i, j, k, l;
+  int8_t j, k, l;
   uint8_t zones_per_line;
   uint8_t number_of_zones = VL53L8CX_RESOLUTION_8X8;
 
@@ -123,6 +121,8 @@ void print_result(VL53L8CX_ResultsData *Result)
       {
         if((long)Result->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l] ==255){
           RGBMatrix.drawPixel((j+1)/8+2, k, RGBMatrix.Color(150, 150, 150));
+          // Serial.print(0);
+          // Serial.print(",");
         } else {
           long distance = (long)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l];
           int maxDist = distance;
@@ -131,11 +131,13 @@ void print_result(VL53L8CX_ResultsData *Result)
           }
           int colVal = map(maxDist,0,2000,10,310);
           setLedColorHSV(colVal,1,1,(j+1)/8, k);
+          // Serial.print(maxDist);
+          // Serial.print(",");
         }
       }
     }
   }
-
+  // Serial.println();
   RGBMatrix.show();
 }
 
@@ -182,21 +184,23 @@ bool ReadVL53L8CX(float* input,
     begin_index = 0;
     pending_initial_data = true;
   }
-  bool new_data = false;
   // int currentFrame[res];
   status = sensor_VL53L8CX_top.vl53l8cx_check_data_ready(&NewDataReady);
   if ((!status) && (NewDataReady != 0)) {
 
     status = sensor_VL53L8CX_top.vl53l8cx_get_ranging_data(&Results);
     print_result(&Results);
-    for (j = 0; j < number_of_zones; j ++)
+    for (int8_t j = 0; j < number_of_zones; j += zones_per_line)
     {
-      //perform data processing here...
-      if((long)(&Results)->target_status[j] !=255){
-        if((long)(&Results)->distance_mm[j]>1000.0) {
-          save_data[begin_index++] = 0.0;
-        } else {
-          save_data[begin_index++] = (long)(&Results)->distance_mm[j];
+      for (int8_t k = (zones_per_line - 1); k >= 0; k--)
+      {
+        //perform data processing here...
+        if((long)(&Results)->target_status[VL53L8CX_NB_TARGET_PER_ZONE * (j+k)] !=255){
+          if((long)(&Results)->distance_mm[VL53L8CX_NB_TARGET_PER_ZONE * (j+k)]>1000.0) {
+            save_data[begin_index++] = 0.0;
+          } else {
+            save_data[begin_index++] = (long)(&Results)->distance_mm[VL53L8CX_NB_TARGET_PER_ZONE * (j+k)];
+          }
         }
       }
     }

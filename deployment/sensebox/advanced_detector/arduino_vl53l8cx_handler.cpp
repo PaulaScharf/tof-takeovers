@@ -192,14 +192,17 @@ bool ReadVL53L8CX(float* input,
 
     status = sensor_VL53L8CX_top.vl53l8cx_get_ranging_data(&Results);
     print_result(&Results);
-    for (j = 0; j < number_of_zones; j ++)
+    for (int8_t j = 0; j < number_of_zones; j += zones_per_line)
     {
-      //perform data processing here...
-      if((long)(&Results)->target_status[j] !=255){
-        if((long)(&Results)->distance_mm[j]>1000.0) {
-          save_data[begin_index++] = 0.0;
-        } else {
-          save_data[begin_index++] = (long)(&Results)->distance_mm[j];
+      for (int8_t k = (zones_per_line - 1); k >= 0; k--)
+      {
+        //perform data processing here...
+        if((long)(&Results)->target_status[j] !=255){
+          if((long)(&Results)->distance_mm[j]>1000.0) {
+            save_data[begin_index++] = 0.0;
+          } else {
+            save_data[begin_index++] = (long)(&Results)->distance_mm[j];
+          }
         }
       }
     }
