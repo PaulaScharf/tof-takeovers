@@ -77,7 +77,7 @@ def get_sensor_data(timestamp, prediction):
 
                             # Farbwertberechnung für die Sensorvisualisuerng
                             color_value = int(value * 255 / 2000)
-                            sensor_data[i*block_size_y:(i+1)*block_size_y, j*block_size_x:(j+1)*block_size_x] = num_to_rgb(value, 2000)
+                            sensor_data[(7-i)*block_size_y:((7-i)+1)*block_size_y, j*block_size_x:(j+1)*block_size_x] = num_to_rgb(value, 2000)
                                 
                             # Textvorbereitung für Sensordaten
                             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -90,7 +90,7 @@ def get_sensor_data(timestamp, prediction):
                             # Berechnen der Position, an der der Text eingefügt werden soll
                             text_size = cv2.getTextSize(text, font, font_scale, font_thickness)[0]
                             text_x = j * block_size_x + (block_size_x - text_size[0]) // 2
-                            text_y = i * block_size_y + (block_size_y + text_size[1]) // 2
+                            text_y = (7-i) * block_size_y + (block_size_y + text_size[1]) // 2
 
                             cv2.putText(sensor_data, text, (text_x, text_y), font, font_scale, font_color, font_thickness)
 
