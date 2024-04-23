@@ -1,13 +1,5 @@
-# TODO: refactor this code
-import pandas as pd
-from tqdm import tqdm
-import numpy as np
-
-to_reverse = False
-to_rotate_90 = False
-to_rotate_270 = False
-
 time_pairs = [
+    # Fahrraeder.csv
         ("16:05:27.627", "16:05:28.203"),
         ("16:05:33.571", "16:05:33.961"),
         ("16:05:40.675", "16:05:41.171"),
@@ -82,10 +74,8 @@ time_pairs = [
         ("16:13:20.115", "16:13:20.354"),
         ("16:13:24.249", "16:13:24.591"),
         ("16:13:25.225", "16:13:25.767"),
-        ("16:13:26.104", "16:13:26.349") 
-    ]
-
-time_pairs_reverse = [
+        ("16:13:26.104", "16:13:26.349"),
+    # reverseData.csv
         ("11:46:00.018","11:46:01.892"),
         ("11:46:02.460","11:46:04.152"),
         ("11:46:05.167","11:46:06.384"),
@@ -185,96 +175,3 @@ time_pairs_reverse = [
         ("11:52:55.066","11:52:55.959"),
         ("11:52:56.768","11:52:57.415"),
     ]
-
-time_pairs_stadtlohnweg_autos = [ 
-    # stadtlohnweg_autos_1
-    ("12:56:36.859","12:56:37.065"),
-    ("12:56:39.958","12:56:40.355"),
-    ("12:56:47.355","12:56:47.577"),
-    ("12:56:50.655","12:56:50.785"),
-    ("12:56:53.559","12:56:53.622"),
-    ("12:56:55.603","12:56:56.071"),
-    ("12:56:57.914","12:56:57.176"),
-    ("12:56:59.762","12:57:00.223"),
-    ("12:57:02.138","12:57:02.533"),
-    ("12:57:04.055","12:57:04.315"),
-    ("12:57:42.999","12:57:43.331"),
-    ("12:57:44.060","12:57:44.253"),
-    ("12:57:45.773","12:57:45.903"),
-    ("12:57:51.713","12:57:51.779"),
-    # stadtlohnweg_autos_2
-    ("13:00:39.962","13:00:39.962"),
-    ("13:00:42.335","13:00:42.335"),
-    ("13:00:43.325","13:00:43.596"),
-    ("13:00:52.371","13:00:52.503"),
-    ("13:00:56.989","13:00:57.121"),
-    ("13:01:00.620","13:01:00.886"),
-    ("13:01:04.118","13:01:04.184"),
-    ("13:01:15.013","13:01:15.208"), # maybe this is too long?
-    ("13:01:16.403","13:01:16.926"), # spotty
-    ("13:01:18.048","13:01:18.144"),
-    ("13:01:20.688","13:01:20.756"),
-    ("13:01:33.692","13:01:33.825"),
-    ("13:01:34.815","13:01:35.145"),
-    ("13:01:37.256","13:01:37.856"),
-    ("13:01:43.332","13:01:44.188"),
-    ("13:01:47.027","13:01:47.165"),
-    ("13:01:49.668","13:01:49.800"),
-    ("13:01:53.695","13:01:53.961"),
-    ("13:01:55.410","13:01:55.874"),
-    ("13:01:57.593","13:01:57.992"),
-    ("13:01:59.437","13:01:59.773"),
-    ("13:02:01.816","13:02:02.011"),
-    ("13:02:05.840","13:02:06.107"),
-    ("13:02:19.966","13:02:20.237")]
-
-data = pd.read_csv('./training/trainingsdata/unlabeled/paula/autos_2.csv')
-    
-data['Timestamp'] = pd.to_datetime(data['Timestamp'], format='%H:%M:%S.%f')
-data['Timestamp'] = data['Timestamp'].dt.time
-
-X = data.iloc[:, :-2].values
-data = data.astype({'Label': 'int32'})
-for index, row in tqdm(data.iterrows(), total=data.shape[0]):
-    if to_reverse:
-        for j in range(0, len(X[index]), 8): 
-            X[index, j:j+8] = X[index, j:j+8][::-1]
-    elif to_rotate_90:
-        for k in range(0,20):
-            original_array = X[index][k*64:(k+1)*64]
-            original_matrix = original_array.reshape(8,8)
-            rotated_matrix = np.rot90(original_matrix)
-            rotated_array = rotated_matrix.flatten()
-            X[index][k*64:(k+1)*64] = rotated_array
-    elif to_rotate_270:
-        for k in range(0,20):
-            original_array = X[index][k*64:(k+1)*64]
-            original_matrix = original_array.reshape(8,8)
-            rotated_matrix = np.rot90(original_matrix,3)
-            rotated_array = rotated_matrix.flatten()
-            X[index][k*64:(k+1)*64] = rotated_array
-    data.at[index, 'Label'] = 0
-    for start, end in time_pairs_stadtlohnweg_autos:
-        start_datetime = pd.to_datetime(start, format='%H:%M:%S.%f')
-
-        
-        start_time = start_datetime.time()
-        end_datetime = pd.to_datetime(end, format='%H:%M:%S.%f')
-        end_time = end_datetime.time()
-    
-        # if start_time <= row['Timestamp'] <= end_time:
-        #     data.at[index, 'Label'] = 2
-        if to_reverse or to_rotate_90 or to_rotate_270:
-            if start_time <= row['Timestamp'] <= end_time:
-                data.at[index, 'Label'] = 1
-        else:
-            if start_time <= row['Timestamp'] <= end_time:
-                data.at[index, 'Label'] = 1
-
-data.iloc[:, :-2] = X
-
-if to_reverse or to_rotate_90 or to_rotate_270:
-    data = data[data['Label'] != 0] 
-    data['Label'] = 0
-
-data.to_csv('./training/trainingsdata/labeled/paula/autos_2.csv', encoding='utf-8', index=False)

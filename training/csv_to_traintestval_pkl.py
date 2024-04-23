@@ -7,13 +7,13 @@ import pickle
 print("Erzeugen der Datensplits...")
 
 labeled_datasets_paths = [
-    './training/trainingsdata/labeled/stadtlohnweg_autos/stadtlohnweg_autos_1.csv',
-    './training/trainingsdata/labeled/stadtlohnweg_autos/stadtlohnweg_autos_2.csv',
-    './training/trainingsdata/labeled/Fahrraeder_Promenade/Fahrraeder.csv',
-    './training/trainingsdata/labeled/Fahrraeder_Promenade/Fahrraeder_reversed.csv',
-    './training/trainingsdata/labeled/Fahrraeder_Promenade/Fahrraeder_rotated_90.csv',
-    './training/trainingsdata/labeled/Fahrraeder_Promenade/Fahrraeder_rotated_270.csv',
-    './training/trainingsdata/labeled/indoor_turning.csv',
+    './training/trainingsdata/labeled/paula/stadtlohnweg_autos_1.csv',
+    './training/trainingsdata/labeled/paula/stadtlohnweg_autos_2.csv',
+    './training/trainingsdata/labeled/luca/Fahrraeder.csv',
+    './training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',
+    './training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',
+    './training/trainingsdata/labeled/luca/Fahrraeder_rotated_270.csv',
+    './training/trainingsdata/labeled/paula/indoor_turning.csv',
 ]
 
 # Einladen der Daten
