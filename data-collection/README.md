@@ -32,3 +32,7 @@ This script is an adjustment of the `vl53l8cx_konfiguration` script. Unlike the 
 - a camera (e.g. a gopro) recording a similar view as the VL53L8CX of the senseBox on a sdcard along with the current date and time
 
 This setup has not been tested yet, but would in theory be more comfortable for data recording
+
+## Visualizing the recorded data and prediction in the Processing IDE
+
+Use the script `visualize_recordings.pde` to visualise a recorded csv file. The script shows all 20 recorded frames at once. The newest frame will be on the bottom right and the oldest on the top left.
