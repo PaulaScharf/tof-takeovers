@@ -4,9 +4,9 @@
 
 **Hardware setup:**
 - one senseBox on a bicycle carrier recording and streaming data either with the `vl53l8cx_konfiguration` arduino script (used by Luca) or the `data_collection_serial_monitor` arduino script (used by Paula)
-- one webcam on the bicycle carrier which is oriented to have a similar view as the VL53L8CX of the senseBox (the views of the sensor and the camera dont have to be perfectly aligned. The webcam is only used for labeling)
+- one webcam on the bicycle carrier which is oriented to have a similar view as the VL53L8CX of the senseBox (the views of the sensor and the camera dont have to be perfectly aligned. The camera view is only used for labeling)
 - Optional: one senseBox on a bicycle carrier predicting live on data from its VL53L8CX sensor and streaming the predictions to console (using e.g. the `deplyoment/sensebox/mini_detector` script). A seperate senseBox is used for prediction because streaming live data and predicting at the same time decreases the framerate
-- one notebook in a backpack of the cyclist connected to the webcam and senseBox(es). This notebook runs the `collectData.py` script and screen records the output of the script. The screen recording is used for labeling the csv file produced by the `collectData.py` script
+- one notebook connected to the webcam and senseBox(es) in a backpack of the cyclist. This notebook runs the `collectData.py` script and screen records the output of the script. The screen recording is used for labeling the csv file produced by the `collectData.py` script
 
 **Warning:** It often happened to me that I lost connection to one of the senseBoxes or the webcam (either cause of an unplugged cable or an overflow of the serial monitor). Be sure to check the notebook regularly to see if its still recording properly.
 
@@ -15,6 +15,8 @@
 This script is currently configured to receive data over serial connection from two senseBoxes: One senseBox for streaming the live sensordata and one senseBox for streaming live predictions of sensor data. If you are not interested in the live predictions you need to adjust the code.
 
 This script outputs a csv file "test.csv" with the live sensordata and predictions. Be aware that if you rerun the script the old "test.csv" file will be overwritten.
+
+This script will also turn all measured distance values greater than 2000 mm to 0 mm.
 
 ### /vl53l8cx_konfiguration
 
@@ -35,4 +37,4 @@ This setup has not been tested yet, but would in theory be more comfortable for 
 
 ## Visualizing the recorded data and prediction in the Processing IDE
 
-Use the script `visualize_recordings.pde` to visualise a recorded csv file. The script shows all 20 recorded frames at once. The newest frame will be on the bottom right and the oldest on the top left.
+Use the script `visualize_recordings.pde` to visualize a recorded csv file. The script shows all 20 recorded frames at once. The newest frame will be on the bottom right and the oldest on the top left.
