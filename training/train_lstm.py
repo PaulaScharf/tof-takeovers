@@ -2,6 +2,8 @@ import pickle
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
+import matplotlib.pyplot as plt
+from tensorflow.keras.callbacks import EarlyStopping
 
 data_path = "./training/trainingsdata/traintestval/"
 
@@ -36,8 +38,20 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy',
         tf.keras.metrics.Recall(name='recall'),
         tf.keras.metrics.AUC(name='auc')])
 
+# Define early stopping callback to monitor validation loss
+early_stopping = EarlyStopping(monitor='val_loss', patience=7)
+
 # Modell trainieren
-model.fit(X_train, y_train, epochs=50, batch_size=64, validation_data=(X_val, y_val))
+history = model.fit(X_train, y_train, epochs=200, batch_size=64, validation_data=(X_val, y_val), callbacks=[early_stopping])
+
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.legend()
+plt.savefig('training/models/training_validation_plot.png')
+
 
 # Modell evaluieren
 metrics = model.evaluate(X_test, y_test, return_dict=True)
