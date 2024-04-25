@@ -1,3 +1,5 @@
+#define BLUETOOTH false
+
 #include <TensorFlowLite.h>
 
 #include "tensorflow/lite/micro/kernels/micro_ops.h"
@@ -10,8 +12,17 @@
 #include <Wire.h>
 #include <vl53l8cx_class.h>
 
+
 #define kChannelNumber 64
 #define kFrameNumber 20
+
+
+float prediction = 0;
+
+#if BLUETOOTH
+#include <SenseBoxBLE.h>
+int overtakingPredictionCharacteristic = 0;
+#endif
 
 // Globals, used for compatibility with Arduino-style sketches.
 namespace {
@@ -71,7 +82,13 @@ void setup() {
 
   input_length = model_input->bytes / sizeof(float);
   Serial.printf("input_length: %i \n", input_length);
-
+#if BLUETOOTH
+  // setup bluetooth
+  SenseBoxBLE::start("senseBox-BLE-Paula"); // prefix "senseBox" muss bleiben, dahinter kannst du es auch anders benennen
+  SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
+  overtakingPredictionCharacteristic = SenseBoxBLE::addCharacteristic("FC01C6882C444965AE18373AF9FED18D");
+  Serial.println("bluetooth successfully setup");
+#endif
   bool setup_status = SetupVL53L8CX();
   if (!setup_status) {
     Serial.println("Setting up sensor failed\n");
@@ -88,10 +105,20 @@ void RecognizeManeuvers() {
         return;
     }
     const float* prediction_scores = interpreter->output(0)->data.f;
-    Serial.println(prediction_scores[0]);
+    prediction = prediction_scores[0];
+#if BLUETOOTH
+    bool isConnected = SenseBoxBLE::write(overtakingPredictionCharacteristic, prediction);
+#else
+    Serial.println(prediction);
+#endif
 }
-
+long currentTime = 0;
 void loop() { 
+#if BLUETOOTH
+  SenseBoxBLE::poll();
+#endif
+  // Serial.println(millis()-currentTime);
+  // currentTime = millis();
   // Attempt to read new data from the VL53L8CX.
   bool got_data =
       ReadVL53L8CX(model_input->data.f, input_length, false);
@@ -99,5 +126,4 @@ void loop() {
   if (!got_data) return;
 
   RecognizeManeuvers();
-
 }
