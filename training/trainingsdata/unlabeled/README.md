@@ -12,7 +12,7 @@ Luca drove past parked cars. This video is intended (!) to be reversed.
 
 ## paula/
 ### autos_1.csv & autos_2.csv
-Paula drove past parked cars. The videos are already reversed.
+Paula drove past parked cars with the sensor orientation reversed. For the sensor it looks like the recorded cars are overtaking.
 
 ### indoor_turning.csv
 Paula recorded this inside her office. No takeovers are visible in this video.
