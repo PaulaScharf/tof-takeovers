@@ -126,7 +126,7 @@ void RecognizeManeuvers() {
     const float* prediction_scores = interpreter->output(0)->data.f;
         const int found_gesture = PredictManeuver(prediction_scores);
     if(1-prediction_scores[0]>0.0) {
-      Serial.println(1-prediction_scores[0]);
+      Serial.println(prediction_scores[0]);
     }
   }
 }
