@@ -9,20 +9,7 @@
 #define PWREN_PIN 2
 VL53L8CX sensor_VL53L8CX_top(&DEV_I2C, LPN_PIN, I2C_RST_PIN);
 
-#include <Adafruit_GFX.h>
-#include <Adafruit_NeoMatrix.h>
-#include <Adafruit_NeoPixel.h>
-
-#define PIN 2
-
-
-Adafruit_NeoMatrix RGBMatrix = Adafruit_NeoMatrix(12, 8, PIN,
-  NEO_MATRIX_TOP     + NEO_MATRIX_LEFT +
-  NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
-  NEO_GRB            + NEO_KHZ800);
-
 void measure(void);
-String dataStr = "";
 
 VL53L8CX_DetectionThresholds thresholds[VL53L8CX_NB_THRESHOLDS];
 const int res = VL53L8CX_RESOLUTION_8X8;
@@ -32,13 +19,9 @@ bool EnableSignal = false;
 char report[256];
 volatile int interruptCount = 0;
 
-uint8_t number_of_zones = res;
-int8_t i, j, k, l;
-uint8_t zones_per_line = (number_of_zones == 16) ? 4 : 8;
-
 // A buffer holding the last 200 sets of 3-channel values
-const int RING_BUFFER_SIZE = 1920;
-float save_data[RING_BUFFER_SIZE] = {0.0};
+const int RING_BUFFER_SIZE = 1280;
+int save_data[RING_BUFFER_SIZE] = {0.0};
 // Most recent position in the save_data buffer
 int begin_index = 0;
 // True if there is not yet enough data to run inference
@@ -47,100 +30,6 @@ bool pending_initial_data = true;
 int sample_every_n;
 // The number of measurements since we last saved one
 int sample_skip_counter = 1;
-
-
-void setLedColorHSV(int h, double s, double v, int x, int y) {
-  //this is the algorithm to convert from RGB to HSV
-  double r=0; 
-  double g=0; 
-  double b=0;
-
-  int i=(int)floor(h/60.0);
-  double f = h/60.0 - i;
-  double pv = v * (1 - s);
-  double qv = v * (1 - s*f);
-  double tv = v * (1 - s * (1 - f));
-
-  switch (i)
-  {
-  case 0: //rojo dominante
-    r = v;
-    g = tv;
-    b = pv;
-    break;
-  case 1: //verde
-    r = qv;
-    g = v;
-    b = pv;
-    break;
-  case 2: 
-    r = pv;
-    g = v;
-    b = tv;
-    break;
-  case 3: //azul
-    r = pv;
-    g = qv;
-    b = v;
-    break;
-  case 4:
-    r = tv;
-    g = pv;
-    b = v;
-    break;
-  case 5: //rojo
-    r = v;
-    g = pv;
-    b = qv;
-    break;
-  }
-
-  //set each component to a integer value between 0 and 255
-  int red=constrain((int)255*r,0,255);
-  int green=constrain((int)255*g,0,255);
-  int blue=constrain((int)255*b,0,255);
-
-  RGBMatrix.drawPixel(x+2,y, RGBMatrix.Color(red, green, blue));
-}
-
-
-void print_result(VL53L8CX_ResultsData *Result)
-{
-  int8_t j, k, l;
-  uint8_t zones_per_line;
-  uint8_t number_of_zones = VL53L8CX_RESOLUTION_8X8;
-
-  zones_per_line = (number_of_zones == 16) ? 4 : 8;
-  dataStr = "";
-
-  for (j = 0; j < number_of_zones; j += zones_per_line)
-  {
-    for (l = 0; l < VL53L8CX_NB_TARGET_PER_ZONE; l++)
-    {
-      for (k = (zones_per_line - 1); k >= 0; k--)
-      {
-        if((long)Result->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l] ==255){
-          RGBMatrix.drawPixel((j+1)/8+2, k, RGBMatrix.Color(150, 150, 150));
-          // Serial.print(0);
-          // Serial.print(",");
-        } else {
-          long distance = (long)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l];
-          int maxDist = distance;
-          if (maxDist > 1000) {
-            maxDist = 0;
-          }
-          int colVal = map(maxDist,0,2000,10,310);
-          setLedColorHSV(colVal,1,1,(j+1)/8, k);
-          // Serial.print(maxDist);
-          // Serial.print(",");
-        }
-      }
-    }
-  }
-  // Serial.println();
-  RGBMatrix.show();
-}
-
 
 bool SetupVL53L8CX() {
   // Enable PWREN pin if present
@@ -165,12 +54,8 @@ bool SetupVL53L8CX() {
   // Start Measurements.
   sensor_VL53L8CX_top.vl53l8cx_start_ranging(); 
 
-  RGBMatrix.setBrightness(15);
-  RGBMatrix.begin();
-
   return true;
 }
-
 
 VL53L8CX_ResultsData Results;
 uint8_t NewDataReady = 0;
@@ -179,27 +64,31 @@ int lastReading = 0;
 bool ReadVL53L8CX(float* input,
                        int length, bool reset_buffer) {
                         // Clear the buffer if required, e.g. after a successful prediction
+
+  int8_t i, j, k, l;
+  uint8_t zones_per_line;
+  uint8_t number_of_zones = res;
+
+  zones_per_line = (number_of_zones == 16) ? 4 : 8;
   if (reset_buffer) {
     memset(save_data, 0, RING_BUFFER_SIZE * sizeof(float)*64);
     begin_index = 0;
     pending_initial_data = true;
   }
-  // int currentFrame[res];
   status = sensor_VL53L8CX_top.vl53l8cx_check_data_ready(&NewDataReady);
   if ((!status) && (NewDataReady != 0)) {
 
     status = sensor_VL53L8CX_top.vl53l8cx_get_ranging_data(&Results);
-    print_result(&Results);
-    for (int8_t j = 0; j < number_of_zones; j += zones_per_line)
+    for (j = 0; j < number_of_zones; j += zones_per_line)
     {
-      for (int8_t k = (zones_per_line - 1); k >= 0; k--)
+      for (l = 0; l < VL53L8CX_NB_TARGET_PER_ZONE; l++)
       {
-        //perform data processing here...
-        if((long)(&Results)->target_status[VL53L8CX_NB_TARGET_PER_ZONE * (j+k)] !=255){
-          if((long)(&Results)->distance_mm[VL53L8CX_NB_TARGET_PER_ZONE * (j+k)]>1000.0) {
+        for (k = (zones_per_line - 1); k >= 0; k--)
+        {
+          if((float)(&Results)->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l] == 255.0 || (float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l] > 2000.0){
             save_data[begin_index++] = 0.0;
           } else {
-            save_data[begin_index++] = (long)(&Results)->distance_mm[VL53L8CX_NB_TARGET_PER_ZONE * (j+k)];
+            save_data[begin_index++] = (float)(&Results)->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l];
           }
         }
       }
@@ -207,7 +96,7 @@ bool ReadVL53L8CX(float* input,
 
     NewDataReady = 0;
     // If we reached the end of the circle buffer, reset
-    if (begin_index >= (1400)) {
+    if (begin_index >= (RING_BUFFER_SIZE)) {
       begin_index = 0;
       // Check if we are ready for prediction or still pending more initial data
       if (pending_initial_data) {
@@ -221,10 +110,11 @@ bool ReadVL53L8CX(float* input,
     }
 
     // Copy the requested number of bytes to the provided input tensor
+
     for (int i = 0; i < length; ++i) {
       int ring_array_index = begin_index + i - length;
       if (ring_array_index < 0) {
-        ring_array_index += (1400);
+        ring_array_index += (RING_BUFFER_SIZE);
       }
       input[i] = save_data[ring_array_index];
       // Serial.print(input[i]);
