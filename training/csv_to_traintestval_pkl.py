@@ -2,13 +2,17 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pickle
+import numpy as np
+import csv
 
 # The boolean at the end indicates, if the "no takeover"-class should be undersampled or not
 # If it is not undersampled, instances of "no takeover" from other files will be removed to make space
 labeled_datasets_paths = [
     ['./training/trainingsdata/labeled/paula/autos_1.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_2.csv',True],
+    ['./training/trainingsdata/labeled/paula/autos_3.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_4.csv',True],
+    ['./training/trainingsdata/labeled/paula/autos_5.csv',True],
     ['./training/trainingsdata/labeled/luca/Fahrraeder.csv',True],
     ['./training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',True],
     ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',True],
@@ -27,7 +31,8 @@ for [path, undersample] in labeled_datasets_paths:
         class_0 = temp[temp['Label'] == 0]
         class_1 = temp[temp['Label'] == 1]
         n_class_1 = len(class_1)
-        class_0_sample = class_0.sample(n_class_1)
+        print("" + str(n_class_1) + " " + str(len(class_0)) + " " + str(len(class_1)/len(class_0)))
+        class_0_sample = class_0.sample(n_class_1*2)
         temp = pd.concat([class_0_sample, class_1])
     else:
         class_0_data = data[data['Label'] == 0]
@@ -55,8 +60,29 @@ y = data.iloc[:, -1].values
 
 
 # TODO: Should we normalise data or not? Normalising improves training results, but then we also have to normalise during detection (I think)
-# scaler = StandardScaler()
-# X = scaler.fit_transform(X)
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Define the file name
+filename = './training/trainingsdata/traintestval/normalization_arrays.cpp'
+
+# Write arrays to C++ file
+with open(filename, 'w') as file:
+    file.write("#include <iostream>\n\n")
+    file.write("int main() {\n")
+    file.write("    // Mean array\n")
+    file.write("    double means[] = {")
+    file.write(", ".join(str(mean) for mean in scaler.mean_))
+    file.write("};\n\n")
+    file.write("    // Standard deviation array\n")
+    file.write("    double std_deviations[] = {")
+    file.write(", ".join(str(std_deviation) for std_deviation in np.sqrt(scaler.var_)))
+    file.write("};\n\n")
+
+print("mean:")
+print(scaler.mean_)
+print("standard deviation:")
+print(np.sqrt(scaler.var_))
 
 # reshape data into 20 frames of 64 pixels each
 X = X.reshape((-1, 20, 64))

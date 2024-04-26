@@ -84,7 +84,7 @@ void setup() {
   Serial.printf("input_length: %i \n", input_length);
 #if BLUETOOTH
   // setup bluetooth
-  SenseBoxBLE::start("senseBox-BLE-Paula"); // prefix "senseBox" muss bleiben, dahinter kannst du es auch anders benennen
+  SenseBoxBLE::start("senseBox-takeover-detection"); // prefix "senseBox" muss bleiben, dahinter kannst du es auch anders benennen
   SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
   overtakingPredictionCharacteristic = SenseBoxBLE::addCharacteristic("FC01C6882C444965AE18373AF9FED18D");
   Serial.println("bluetooth successfully setup");
