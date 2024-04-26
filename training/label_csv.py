@@ -8,10 +8,10 @@ to_reverse = False
 to_rotate_90 = False
 to_rotate_270 = False
 
-with open('training/trainingsdata/unlabeled/paula/timestamps_autos_2.json', 'r') as json_file:
+with open('training/trainingsdata/unlabeled/paula/timestamps_autos_4.json', 'r') as json_file:
     time_pairs = json.load(json_file)
 
-data = pd.read_csv('./training/trainingsdata/unlabeled/paula/autos_2.csv')
+data = pd.read_csv('./training/trainingsdata/unlabeled/paula/autos_4.csv')
 
 data['Timestamp'] = pd.to_datetime(data['Timestamp'], format='%H:%M:%S.%f')
 data['Timestamp'] = data['Timestamp'].dt.time
@@ -60,4 +60,4 @@ if to_reverse or to_rotate_90 or to_rotate_270:
     data = data[data['Label'] != 0] 
     data['Label'] = 0
 
-data.to_csv('./training/trainingsdata/labeled/paula/autos_2.csv', encoding='utf-8', index=False)
+data.to_csv('./training/trainingsdata/labeled/paula/autos_4.csv', encoding='utf-8', index=False)
