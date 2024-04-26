@@ -3,58 +3,70 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pickle
 
-
-print("Erzeugen der Datensplits...")
-
+# The boolean at the end indicates, if the "no takeover"-class should be undersampled or not
+# If it is not undersampled, instances of "no takeover" from other files will be removed to make space
 labeled_datasets_paths = [
-    './training/trainingsdata/labeled/paula/stadtlohnweg_autos_1.csv',
-    './training/trainingsdata/labeled/paula/stadtlohnweg_autos_2.csv',
-    './training/trainingsdata/labeled/luca/Fahrraeder.csv',
-    './training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',
-    './training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',
-    './training/trainingsdata/labeled/luca/Fahrraeder_rotated_270.csv',
-    './training/trainingsdata/labeled/paula/indoor_turning.csv',
+    ['./training/trainingsdata/labeled/paula/autos_1.csv',True],
+    ['./training/trainingsdata/labeled/paula/autos_2.csv',True],
+    ['./training/trainingsdata/labeled/paula/autos_4.csv',True],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder.csv',True],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',True],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',True],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_270.csv',True],
+    ['./training/trainingsdata/labeled/paula/indoor_turning.csv',False],
 ]
 
-# Einladen der Daten
+# loading data and optionally undersampling
 data = []
-for path in labeled_datasets_paths:
+for [path, undersample] in labeled_datasets_paths:
     temp = pd.read_csv(path)
     temp['Timestamp'] = pd.to_datetime(temp['Timestamp'], format='%H:%M:%S.%f', errors="coerce").fillna(pd.to_datetime(temp['Timestamp'], format='%H:%M:%S', errors="coerce"))
     temp['Timestamp'] = temp['Timestamp'].dt.time
+
+    if undersample:
+        class_0 = temp[temp['Label'] == 0]
+        class_1 = temp[temp['Label'] == 1]
+        n_class_1 = len(class_1)
+        class_0_sample = class_0.sample(n_class_1)
+        temp = pd.concat([class_0_sample, class_1])
+    else:
+        class_0_data = data[data['Label'] == 0]
+        class_1_data = data[data['Label'] == 1]
+        class_0_temp = temp[temp['Label'] == 0]
+        class_1_temp = temp[temp['Label'] == 1]
+        n_class_1 = (len(class_0_data)+len(class_1_temp))-len(class_0_temp)
+        if n_class_1 >= 0:
+            class_0_data_sample = class_0_data.sample(n_class_1)
+            data = pd.concat([class_0_data_sample, class_1_data])
+        else:
+            data = class_1_data
+            class_0_temp_sample = class_0_temp.sample(len(class_0_temp)+n_class_1)
+            temp
+
     if len(data) == 0:
         data = temp
     else:
         data = pd.concat([data,temp])
 
-# Optional: Unter-Sampling der überrepräsentierten Klasse
-class_0 = data[data['Label'] == 0]
-class_1 = data[data['Label'] == 1]
 
-n_class_1 = len(class_1)
-class_0_sample = class_0.sample(n_class_1)
-data_balanced = pd.concat([class_0_sample, class_1])
+# split  into features (X) and labels (y)
+X = data.iloc[:, :-2].values
+y = data.iloc[:, -1].values
 
 
-
-# Daten für Features und Labels aufteilen
-X = data_balanced.iloc[:, :-2].values
-y = data_balanced.iloc[:, -1].values
-
-
-# TODO: Luca normalised the data in his code. Why?? Do we need to do that?
+# TODO: Should we normalise data or not? Normalising improves training results, but then we also have to normalise during detection (I think)
 # scaler = StandardScaler()
 # X = scaler.fit_transform(X)
 
-# Daten in das erforderliche Format umwandeln
+# reshape data into 20 frames of 64 pixels each
 X = X.reshape((-1, 20, 64))
 
-# Daten in Trainings- und Testsets aufteilen
+# split into train, test and validation
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 
 
-# speichern der Daten um Zeit zu sparen
+# save data locally
 with open('./training/trainingsdata/traintestval/train_data.pkl', 'wb') as file:
     pickle.dump((X_train, y_train), file)
 
