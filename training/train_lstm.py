@@ -50,7 +50,15 @@ plt.plot(history.history['accuracy'], label='Training Accuracy')
 plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
 plt.xlabel('Epoch')
 plt.legend()
-plt.savefig('training/models/training_validation_plot.png')
+plt.savefig('training/models/loss_accuracy_plot.png')
+plt.clf()
+plt.plot(history.history['precision'], label='Training precision')
+plt.plot(history.history['val_precision'], label='Validation precision')
+plt.plot(history.history['recall'], label='Training recall')
+plt.plot(history.history['val_recall'], label='Validation recall')
+plt.xlabel('Epoch')
+plt.legend()
+plt.savefig('training/models/precision_recall_plot.png')
 
 
 # Modell evaluieren
