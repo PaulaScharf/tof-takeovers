@@ -31,7 +31,10 @@ input_tensor_index = interpreter.get_input_details()[0]['index']
 output_tensor_index = interpreter.get_output_details()[0]['index']
 
 # Run inference on test data
-correct_predictions = 0
+true_pos = 0
+true_neg = 0
+false_pos = 0
+false_neg = 0
 total_predictions = len(X_test)
 
 for i in range(total_predictions):
@@ -45,12 +48,25 @@ for i in range(total_predictions):
     true_label = y_test[i]
     
     if predicted_label == true_label:
-        correct_predictions += 1
+        if predicted_label == 1:
+            true_pos += 1
+        else:
+            true_neg += 1
+    else:
+        if predicted_label == 1:
+            false_pos += 1
+        else:
+            false_neg += 1
     # else:
     #      print("lite model predicted: ", lite_predictions[0])
     #      print("org model predicted:  ", model.predict(np.array( [X_test[i],]),verbose = 0)[0][0])
          
 
 # Compute accuracy
-accuracy = correct_predictions / total_predictions
-print("TensorFlow Lite model accuracy:", accuracy)
+accuracy = (true_pos+true_neg) / total_predictions
+precision = (true_pos) / (true_pos + false_pos)
+recall = (true_pos) / (true_pos + false_neg)
+print("TensorFlow Lite model:")
+print(" accuracy:", round(accuracy*100,2))
+print(" precision:", round(precision*100,2))
+print(" recall:", round(recall*100,2))
