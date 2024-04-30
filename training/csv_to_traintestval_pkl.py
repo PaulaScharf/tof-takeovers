@@ -14,9 +14,9 @@ labeled_datasets_paths = [
     ['./training/trainingsdata/labeled/paula/autos_4.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_5.csv',True],
     ['./training/trainingsdata/labeled/luca/Fahrraeder.csv',True],
-    ['./training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',True],
-    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',True],
-    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_270.csv',True],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',False],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',False],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_270.csv',False],
     ['./training/trainingsdata/labeled/paula/indoor_turning.csv',False],
 ]
 
@@ -26,12 +26,13 @@ for [path, undersample] in labeled_datasets_paths:
     temp = pd.read_csv(path)
     temp['Timestamp'] = pd.to_datetime(temp['Timestamp'], format='%H:%M:%S.%f', errors="coerce").fillna(pd.to_datetime(temp['Timestamp'], format='%H:%M:%S', errors="coerce"))
     temp['Timestamp'] = temp['Timestamp'].dt.time
+    temp['Path'] = path
 
     if undersample:
         class_0 = temp[temp['Label'] == 0]
         class_1 = temp[temp['Label'] == 1]
         n_class_1 = len(class_1)
-        print("" + str(n_class_1) + " " + str(len(class_0)) + " " + str(len(class_1)/len(class_0)))
+        print(path, "" + str(n_class_1) + " " + str(len(class_0)) + " " + str(round((len(class_1)/len(class_0))*100,2)))
         class_0_sample = class_0.sample(n_class_1*2)
         temp = pd.concat([class_0_sample, class_1])
     else:
@@ -40,49 +41,41 @@ for [path, undersample] in labeled_datasets_paths:
         class_0_temp = temp[temp['Label'] == 0]
         class_1_temp = temp[temp['Label'] == 1]
         n_class_1 = (len(class_0_data)+len(class_1_temp))-len(class_0_temp)
+        print(path, "" + str(n_class_1) + " " + str(len(class_0_temp)) + " " + str(round((len(class_1_temp)/len(class_0_temp))*100,2)))
         if n_class_1 >= 0:
-            class_0_data_sample = class_0_data.sample(n_class_1)
+            class_0_data_sample = class_0_data.sample(round(n_class_1))
             data = pd.concat([class_0_data_sample, class_1_data])
         else:
             data = class_1_data
             class_0_temp_sample = class_0_temp.sample(len(class_0_temp)+n_class_1)
-            temp
+            temp = pd.concat([class_0_temp_sample, class_1_temp])
 
     if len(data) == 0:
         data = temp
     else:
         data = pd.concat([data,temp])
 
+for [path, undersample] in labeled_datasets_paths:
+    print(path, len(data[data['Path'] == path]))
 
 # split  into features (X) and labels (y)
-X = data.iloc[:, :-2].values
-y = data.iloc[:, -1].values
+X = data.iloc[:, :-3].values
+y = data.iloc[:, -2:-1].values
 
 
 # TODO: Should we normalise data or not? Normalising improves training results, but then we also have to normalise during detection (I think)
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
-
-# Define the file name
 filename = './training/trainingsdata/traintestval/normalization_arrays.cpp'
-
-# Write arrays to C++ file
 with open(filename, 'w') as file:
-    file.write("#include <iostream>\n\n")
-    file.write("int main() {\n")
-    file.write("    // Mean array\n")
-    file.write("    double means[] = {")
+    file.write("// Mean array\n")
+    file.write("double means[] = {")
     file.write(", ".join(str(mean) for mean in scaler.mean_))
     file.write("};\n\n")
-    file.write("    // Standard deviation array\n")
-    file.write("    double std_deviations[] = {")
+    file.write("// Standard deviation array\n")
+    file.write("double std_deviations[] = {")
     file.write(", ".join(str(std_deviation) for std_deviation in np.sqrt(scaler.var_)))
     file.write("};\n\n")
-
-print("mean:")
-print(scaler.mean_)
-print("standard deviation:")
-print(np.sqrt(scaler.var_))
 
 # reshape data into 20 frames of 64 pixels each
 X = X.reshape((-1, 20, 64))
