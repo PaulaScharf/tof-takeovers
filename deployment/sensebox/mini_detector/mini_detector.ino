@@ -1,4 +1,4 @@
-#define BLUETOOTH false
+#define BLUETOOTH true
 
 #include <TensorFlowLite.h>
 
@@ -22,6 +22,27 @@ float prediction = 0;
 #if BLUETOOTH
 #include <SenseBoxBLE.h>
 int overtakingPredictionCharacteristic = 0;
+int distanceMatrixCharacteristic = 0;
+const char* BLE_CHARACTERISTICS[] = {
+  "7973afc7-e447-492c-a237-6a08c594b301",
+  "7973afc7-e447-492c-a237-6a08c594b302",
+  "7973afc7-e447-492c-a237-6a08c594b303",
+  "7973afc7-e447-492c-a237-6a08c594b304",
+  "7973afc7-e447-492c-a237-6a08c594b305",
+  "7973afc7-e447-492c-a237-6a08c594b306",
+  "7973afc7-e447-492c-a237-6a08c594b307",
+  "7973afc7-e447-492c-a237-6a08c594b308",
+  "7973afc7-e447-492c-a237-6a08c594b309",
+  "7973afc7-e447-492c-a237-6a08c594b310",
+  "7973afc7-e447-492c-a237-6a08c594b311",
+  "7973afc7-e447-492c-a237-6a08c594b312",
+  "7973afc7-e447-492c-a237-6a08c594b313",
+  "7973afc7-e447-492c-a237-6a08c594b314",
+  "7973afc7-e447-492c-a237-6a08c594b315",
+  "7973afc7-e447-492c-a237-6a08c594b316"
+};
+const int NUM_CHARACTERISTICS = sizeof(BLE_CHARACTERISTICS) / sizeof(BLE_CHARACTERISTICS[0]);
+int distanceCharacteristics[NUM_CHARACTERISTICS];
 #endif
 
 // Globals, used for compatibility with Arduino-style sketches.
@@ -87,6 +108,10 @@ void setup() {
   SenseBoxBLE::start("senseBox-takeover-detection"); // prefix "senseBox" muss bleiben, dahinter kannst du es auch anders benennen
   SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
   overtakingPredictionCharacteristic = SenseBoxBLE::addCharacteristic("FC01C6882C444965AE18373AF9FED18D");
+  for (int i = 0; i < NUM_CHARACTERISTICS; i++) {
+    SenseBoxBLE::addService(BLE_CHARACTERISTICS[i]);
+    distanceCharacteristics[i] = SenseBoxBLE::addCharacteristic(BLE_CHARACTERISTICS[i]);
+  }
   Serial.println("bluetooth successfully setup");
 #endif
   bool setup_status = SetupVL53L8CX();
