@@ -13,6 +13,8 @@ labeled_datasets_paths = [
     ['./training/trainingsdata/labeled/paula/autos_3.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_4.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_5.csv',True],
+    ['./training/trainingsdata/labeled/paula/autos_6.csv',True],
+    ['./training/trainingsdata/labeled/paula/autos_7.csv',True],
     ['./training/trainingsdata/labeled/luca/Fahrraeder.csv',True],
     ['./training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',False],
     ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',False],
@@ -41,7 +43,7 @@ for [path, undersample] in labeled_datasets_paths:
         class_0_temp = temp[temp['Label'] == 0]
         class_1_temp = temp[temp['Label'] == 1]
         n_class_1 = (len(class_0_data)+len(class_1_temp))-len(class_0_temp)
-        print(path, "" + str(n_class_1) + " " + str(len(class_0_temp)) + " " + str(round((len(class_1_temp)/len(class_0_temp))*100,2)))
+        print(path, "" + str(n_class_1) + " " + str(len(class_1_data)) + " " + str(round((len(class_1_temp)/len(class_0_temp))*100,2)))
         if n_class_1 >= 0:
             class_0_data_sample = class_0_data.sample(round(n_class_1))
             data = pd.concat([class_0_data_sample, class_1_data])
@@ -55,27 +57,25 @@ for [path, undersample] in labeled_datasets_paths:
     else:
         data = pd.concat([data,temp])
 
-for [path, undersample] in labeled_datasets_paths:
-    print(path, len(data[data['Path'] == path]))
-
+paths = data["Path"]
 # split  into features (X) and labels (y)
 X = data.iloc[:, :-3].values
 y = data.iloc[:, -2:-1].values
 
 
 # TODO: Should we normalise data or not? Normalising improves training results, but then we also have to normalise during detection (I think)
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
-filename = './training/trainingsdata/traintestval/normalization_arrays.cpp'
-with open(filename, 'w') as file:
-    file.write("// Mean array\n")
-    file.write("double means[] = {")
-    file.write(", ".join(str(mean) for mean in scaler.mean_))
-    file.write("};\n\n")
-    file.write("// Standard deviation array\n")
-    file.write("double std_deviations[] = {")
-    file.write(", ".join(str(std_deviation) for std_deviation in np.sqrt(scaler.var_)))
-    file.write("};\n\n")
+# scaler = StandardScaler()
+# X = scaler.fit_transform(X)
+# filename = './training/trainingsdata/traintestval/normalization_arrays.cpp'
+# with open(filename, 'w') as file:
+#     file.write("// Mean array\n")
+#     file.write("double means[] = {")
+#     file.write(", ".join(str(mean) for mean in scaler.mean_))
+#     file.write("};\n\n")
+#     file.write("// Standard deviation array\n")
+#     file.write("double std_deviations[] = {")
+#     file.write(", ".join(str(std_deviation) for std_deviation in np.sqrt(scaler.var_)))
+#     file.write("};\n\n")
 
 # reshape data into 20 frames of 64 pixels each
 X = X.reshape((-1, 20, 64))
@@ -84,6 +84,15 @@ X = X.reshape((-1, 20, 64))
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 
+Paths_train, Paths_test, y_train_2, y_test_2 = train_test_split(paths, y, test_size=0.2, random_state=42)
+Paths_train, Paths_val, y_train_2, y_val_2 = train_test_split(Paths_train, y_train_2, test_size=0.2, random_state=42)
+
+print("-----------------------------------------------------------------------")
+for [path, undersample] in labeled_datasets_paths:
+    train_len = len(Paths_train[Paths_train == path])
+    test_len = len(Paths_test[Paths_test == path])
+    val_len = len(Paths_val[Paths_val == path])
+    print(path, str(train_len+test_len+val_len) + " = " + str(train_len) + " + " + str(test_len) + " + " + str(val_len))
 
 # save data locally
 with open('./training/trainingsdata/traintestval/train_data.pkl', 'wb') as file:
