@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+import joblib
 import pickle
 import numpy as np
 import csv
@@ -57,25 +58,13 @@ for [path, undersample] in labeled_datasets_paths:
     else:
         data = pd.concat([data,temp])
 
-paths = data["Path"]
 # split  into features (X) and labels (y)
 X = data.iloc[:, :-3].values
 y = data.iloc[:, -2:-1].values
 
 
-# TODO: Should we normalise data or not? Normalising improves training results, but then we also have to normalise during detection (I think)
-# scaler = StandardScaler()
-# X = scaler.fit_transform(X)
-# filename = './training/trainingsdata/traintestval/normalization_arrays.cpp'
-# with open(filename, 'w') as file:
-#     file.write("// Mean array\n")
-#     file.write("double means[] = {")
-#     file.write(", ".join(str(mean) for mean in scaler.mean_))
-#     file.write("};\n\n")
-#     file.write("// Standard deviation array\n")
-#     file.write("double std_deviations[] = {")
-#     file.write(", ".join(str(std_deviation) for std_deviation in np.sqrt(scaler.var_)))
-#     file.write("};\n\n")
+# Because we know, that all measured values are constrained below 2000 mm, we can normalize the data by dividing everything by 2000
+X = X/2000.0
 
 # reshape data into 20 frames of 64 pixels each
 X = X.reshape((-1, 20, 64))
@@ -84,9 +73,10 @@ X = X.reshape((-1, 20, 64))
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 
+# print the composition of the data splits
+paths = data["Path"]
 Paths_train, Paths_test, y_train_2, y_test_2 = train_test_split(paths, y, test_size=0.2, random_state=42)
 Paths_train, Paths_val, y_train_2, y_val_2 = train_test_split(Paths_train, y_train_2, test_size=0.2, random_state=42)
-
 print("-----------------------------------------------------------------------")
 for [path, undersample] in labeled_datasets_paths:
     train_len = len(Paths_train[Paths_train == path])

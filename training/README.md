@@ -1,11 +1,7 @@
 ## Preprocessing the data
 Use the `label_csv.py` to label the csv files according to given timestamps (given by Luca). Then use `csv_to_traintestval_pkl.py` to randomly split the data from the csv files into training, testing and validation sets and store these sets as pkl for future easy access.
 
-The resulting pkl files are normalized to aid the training of the model. The normalization is done with the StandardScaler from sklearn and the utilized means and standard deviations are saved in `/traintestval/normalization_arrays.cpp`. These arrays of mean and standard deviation have to be used to normalize live data during deployment like so:
-
-```
-normalized_value = ( live_value - mean ) / standard_deviation
-```
+The resulting pkl files are normalized to aid the training of the model. The normalization is done by dividing each value by 2000. This also has to be done with the live data during deployment.
 
 ---
 

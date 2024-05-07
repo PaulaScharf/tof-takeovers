@@ -1,3 +1,5 @@
+All values are constrained to fall between 0 and 2000 mm.
+
 ## luca/
 The file `Fahrraeder.csv` was recorded by Luca. He very slowly drove along the Promenade and recorded other cyclists overtaking him. The files `Fahrraeder_reversed.csv`, `Fahrraeder_90.csv` and `Fahrraeder_270.csv` are versions of the original `Fahrraeder.csv`, where the videos are rotated. All labels in the latter three videos are 'no takeover' (0).
 

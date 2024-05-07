@@ -63,10 +63,12 @@ for i in range(total_predictions):
          
 
 # Compute accuracy
-accuracy = (true_pos+true_neg) / total_predictions
-precision = (true_pos) / (true_pos + false_pos)
-recall = (true_pos) / (true_pos + false_neg)
 print("TensorFlow Lite model:")
+accuracy = (true_pos+true_neg) / total_predictions
 print(" accuracy:", round(accuracy*100,2))
-print(" precision:", round(precision*100,2))
-print(" recall:", round(recall*100,2))
+if (true_pos + false_pos) > 0:
+    precision = (true_pos) / (true_pos + false_pos)
+    print(" precision:", round(precision*100,2))
+if (true_pos + false_neg) > 0:
+    recall = (true_pos) / (true_pos + false_neg)
+    print(" recall:", round(recall*100,2))

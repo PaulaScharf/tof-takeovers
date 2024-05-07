@@ -234,7 +234,7 @@ void print_result(VL53L8CX_ResultsData *Result)
       {
         //perform data processing here...
         if((long)Result->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l] ==255){
-          dataStr += String(5000) + ";";
+          dataStr += String(0) + ";";
           RGBMatrix.drawPixel((j+1)/8+2, k, RGBMatrix.Color(150, 150, 150));
         } else {
           dataStr += String((long)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]) + ";";
