@@ -10,10 +10,14 @@ Use either `train_lstm.py` or `train_cnn.py` to train a model with the pkl files
 
 `xxd -i models/model_lstm.tflite > models/model_lstm.cc` or `xxd -i models/model_cnn.tflite > models/model_cnn.cc`
 
+The trainings are generally conducted with early stopping and with a batch size of 64 using an Adam optimizer.
+
+#### LSTM
 The lstm model is structured as follows:
 
 ![lstm model](model_lstm.png)
 
+#### CNN
 The cnn model is a WIP.
 
 ---
