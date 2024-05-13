@@ -3,7 +3,7 @@ This folder contains three similar implementations of running the trained model 
 # mini_detector
 Refactored version of the code from advanced detector. This is more readable and only uses arduino files. When you train a new model you need to copy the resulting byte array into the `model_data.ino` file. Furthermore if you did not normalized the training data you need to set the variable "Normalized" at the top of `mini_detector.ino` to false.
 
-At the top of the `mini_detector.ino` there is a defined variable "BLUETOOTH". Per default it is set to false, which means that the prediction values will be send out through the serial connection. If it set to true, the prediction values will be send out via bluetooth low energy.
+At the top of the `mini_detector.ino` there is a defined variable "BLUETOOTH". Per default it is set to true, which means that the prediction values will be send out through via bluetooth low energy. If it set to false, the prediction values will be send out through the serial connection.
 
 # advanced_detector
 This code is more closely based on the [magic wand](https://github.com/petewarden/magic_wand) example code and contains a bit more overhead code and structuiring, that might come in handy sometime.

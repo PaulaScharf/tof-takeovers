@@ -1,7 +1,7 @@
 ## Preprocessing the data
 Use the `label_csv.py` to label the csv files according to given timestamps (given by Luca). Then use `csv_to_traintestval_pkl.py` to randomly split the data from the csv files into training, testing and validation sets and store these sets as pkl for future easy access.
 
-The resulting pkl files are normalized to aid the training of the model. The normalization is done by dividing each value by 2000. This also has to be done with the live data during deployment.
+The resulting pkl files are normalized to aid the training of the model. The normalization is done by dividing each value by 2000. Note, that this also has to be done with the live data during deployment.
 
 ---
 
@@ -10,7 +10,7 @@ Use either `train_lstm.py` or `train_cnn.py` to train a model with the pkl files
 
 `xxd -i models/model_lstm.tflite > models/model_lstm.cc` or `xxd -i models/model_cnn.tflite > models/model_cnn.cc`
 
-The trainings are generally conducted with early stopping and with a batch size of 64 using an Adam optimizer.
+In general, the trainings are conducted with early stopping and with a batch size of 64 using an Adam optimizer.
 
 #### LSTM
 The lstm model is structured as follows:
