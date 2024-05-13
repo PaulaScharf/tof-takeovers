@@ -7,5 +7,8 @@ The file `Fahrraeder.csv` was recorded by Luca. He very slowly drove along the P
 ### autos_1.csv, autos_2.csv, autos_3.csv, autos_4.csv, autos_5.csv, autos_6.csv, autos_7.csv
 Paula drove past parked cars and reversed the sensor orientation, so that it looks like the cars are overtaking. Compared to their unlabeled counterparts, these files have their beginnings and ends removed, as these are mostly empty.
 
+### auto_reversed.csv
+A single reversed car recording from `autos_7.csv`.
+
 ### indoor_turning.csv
 Paula recorded this inside her office. No takeovers are visible in this video.
