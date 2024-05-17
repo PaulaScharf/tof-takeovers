@@ -17,5 +17,11 @@ Paula drove past parked cars with the sensor orientation reversed. For the senso
 ### auto_reversed.csv
 A single reversed car recording from `autos_7.csv`.
 
+### passing_cars.csv
+A few naturally recorded cars that Paula overtook on her bicycle.
+
 ### indoor_turning.csv
 Paula recorded this inside her office. No takeovers are visible in this video.
+
+### bike_setup.csv
+A few frames from setting up the bike, as there are often false positives during that time. It does not feature any takeovers.
