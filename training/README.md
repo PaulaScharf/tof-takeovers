@@ -24,3 +24,9 @@ The cnn model is a WIP.
 
 ## Testing the model
 Use `test_tflite.py` to test the performance of a trained model and its corresponding tflite version.
+
+
+---
+
+# Note
+I am currently trying out multiclass classification (no takeover, car, bike) and added a version of the preprocessing, training and testing files.
