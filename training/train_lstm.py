@@ -1,7 +1,7 @@
 import pickle
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+from tensorflow.keras.layers import LSTM, Dense, Reshape
 import matplotlib.pyplot as plt
 from tensorflow.keras.callbacks import EarlyStopping
 
@@ -22,7 +22,9 @@ print("Daten geladen...")
 
 # Modell aufbauen
 model = Sequential()
-model.add(LSTM(10, return_sequences=False, input_shape=(20, 64), unroll=False, batch_size=1)) # the input of the lstm layer is 20 frames with 64 values each (as the ToF records in 8x8)
+model.add(LSTM(32, return_sequences=True, input_shape=(20,64), unroll=False, batch_size=1)) # the input of the lstm layer is 20 frames with 64 values each (as the ToF records in 8x8)
+model.add(Reshape((-1,16)))
+model.add(LSTM(16, return_sequences=False, unroll=False)) # the input of the lstm layer is 20 frames with 64 values each (as the ToF records in 8x8)
 model.add(Dense(1, activation='sigmoid')) # Sigmoid-Aktivierung für binäre Klassifikation
 
 tf.keras.utils.plot_model(

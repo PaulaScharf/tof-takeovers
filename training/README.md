@@ -18,7 +18,17 @@ The lstm model is structured as follows:
 ![lstm model](model_lstm.png)
 
 #### CNN
-The cnn model is a WIP.
+The cnn model is structured as follows:
+
+![cnn model](model_cnn.png)
+
+Currently I can achieve similar accuracies with both the CNN and the LSTM model. Once I convert them to tflite, the LSTM model significantly looses accuracy. Therefor the CNN approach is currently preferred.
+
+#### CNN + LSTM ??
+It might be worth a try to combine Conv2D and LSTM layers. I cant get that to run on the microcontroller though (It crashes, if I flash such a model onto it...).
+
+To be investigated....
+
 
 ---
 
