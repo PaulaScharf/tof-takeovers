@@ -1,4 +1,4 @@
-#define BLUETOOTH true
+#define BLUETOOTH false
 #define NORMALIZED true
 
 #include <TensorFlowLite.h>
@@ -56,7 +56,7 @@ int input_length;
 // Create an area of memory to use for input, output, and intermediate arrays.
 // The size of this will depend on the model you're using, and may need to be
 // determined by experimentation.
-constexpr int kTensorArenaSize = 7 * 1024 + 1008 ;
+constexpr int kTensorArenaSize = 14 * 1024 + 1008 ;
 uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
 
