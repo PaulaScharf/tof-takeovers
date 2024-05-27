@@ -8,11 +8,13 @@ data_path = "./training/trainingsdata/traintestval/"
 with open(data_path + 'test_data.pkl', 'rb') as file:
     X_test, y_test = pickle.load(file)
 
+# X_test = np.transpose(X_test,(0,2,1))
+
 ######################################## ORG MODEL ###################################
 # Modell aufbauen
-model = tf.keras.models.load_model('./training/models/model.keras')
+model = tf.keras.models.load_model('./training/models/cnn/model.keras')
 # Weights laden
-model.load_weights('./training/models/model_lstm')
+model.load_weights('./training/models/cnn/model_lstm')
 # Compute accuracy
 metrics = model.evaluate(X_test, y_test, return_dict=True)
 print(metrics)
@@ -23,7 +25,7 @@ print(confusion)
 
 ######################################## TFLITE ###################################
 # Load the TensorFlow Lite model
-interpreter = tf.lite.Interpreter(model_path='./training/models/model_lstm.tflite')
+interpreter = tf.lite.Interpreter(model_path='./training/models/cnn/model_lstm.tflite')
 interpreter.allocate_tensors()
 
 # Get input and output tensors

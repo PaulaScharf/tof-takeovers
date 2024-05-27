@@ -16,14 +16,13 @@ labeled_datasets_paths = [
     ['./training/trainingsdata/labeled/paula/autos_5.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_6.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_7.csv',True],
-    ['./training/trainingsdata/labeled/luca/Fahrraeder.csv',True],
-    ['./training/trainingsdata/labeled/luca/Fahrraeder_reversed.csv',False],
-    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_90.csv',False],
-    ['./training/trainingsdata/labeled/luca/Fahrraeder_rotated_270.csv',False],
+    ['./training/trainingsdata/labeled/paula/autos_7_reversed.csv',False],
+    ['./training/trainingsdata/labeled/paula/autos_7_rotated_90.csv',False],
+    ['./training/trainingsdata/labeled/paula/autos_7_rotated_270.csv',False],
     ['./training/trainingsdata/labeled/paula/indoor_turning.csv',False],
     ['./training/trainingsdata/labeled/paula/bike_setup.csv',False],
     ['./training/trainingsdata/labeled/paula/passing_cars.csv',False],
-    ['./training/trainingsdata/labeled/paula/auto_reversed.csv',False],
+    ['./training/trainingsdata/labeled/luca/Fahrraeder_not_overtake.csv',False],
 ]
 
 # loading data and optionally undersampling

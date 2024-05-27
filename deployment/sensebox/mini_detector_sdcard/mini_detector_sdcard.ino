@@ -152,7 +152,7 @@ bool ReadVL53L8CX(float* input,
     token = strtok(NULL, ",");
   }
 
-  if (begin_index >= (1400)) {
+  if (begin_index >= (1280)) {
     begin_index = 0;
     // Check if we are ready for prediction or still pending more initial data
     if (pending_initial_data) {
@@ -169,7 +169,7 @@ bool ReadVL53L8CX(float* input,
   for (int i = 0; i < length; ++i) {
     int ring_array_index = begin_index + i - length;
     if (ring_array_index < 0) {
-      ring_array_index += (1400);
+      ring_array_index += (1280);
     }
 #if NORMALIZED
       input[i] = save_data[ring_array_index]/2000.0;
