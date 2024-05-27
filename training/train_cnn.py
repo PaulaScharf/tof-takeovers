@@ -31,7 +31,7 @@ model.add(Reshape((20,8,8), input_shape=(20,64)))
 model.add(Conv2D(10,(3,3), activation='relu'))
 # model.add(Reshape((-1,4)))
 # model.add(LSTM(16, unroll=False, batch_size=1)) # the input of the lstm layer is 20 frames with 64 values each (as the ToF records in 8x8)
-model.add(Conv2D(5,(3,3), activation='relu'))
+# model.add(Conv2D(5,(3,3), activation='relu'))
 model.add(GlobalAveragePooling2D())
 model.add(Dense(1, activation='sigmoid')) # Sigmoid-Aktivierung für binäre Klassifikation
 model.summary()
