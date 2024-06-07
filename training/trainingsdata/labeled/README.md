@@ -14,6 +14,9 @@ The same as `Fahrraeder.csv` except the all labels are 'no takeover' (0).
 ### autos_1.csv, autos_2.csv, autos_3.csv, autos_4.csv, autos_5.csv, autos_6.csv, autos_7.csv
 Paula drove past parked cars and reversed the sensor orientation, so that it looks like the cars are overtaking. Compared to their unlabeled counterparts, these files have their beginnings and ends removed, as these are mostly empty.
 
+### autos_senseBox_5FPS.csv
+Benni drove on a bike and Paula overtook him with the senseBox car. The recording is sampled to 5FPS. It just contains a single takeover.
+
 ### autos_7_reversed.csv, autos_7_rotated_90.csv, autos_7_rotated_270.csv
 Reversed or rotated versions of `autos_7.csv`. All labels in the latter three videos are 'no takeover' (0).
 
