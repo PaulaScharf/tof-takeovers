@@ -16,6 +16,7 @@ labeled_datasets_paths = [
     ['./training/trainingsdata/labeled/paula/autos_5.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_6.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_7.csv',True],
+    ['./training/trainingsdata/labeled/paula/autos_senseBox_5FPS.csv',True],
     ['./training/trainingsdata/labeled/paula/autos_7_reversed.csv',False],
     ['./training/trainingsdata/labeled/paula/autos_7_rotated_90.csv',False],
     ['./training/trainingsdata/labeled/paula/autos_7_rotated_270.csv',False],

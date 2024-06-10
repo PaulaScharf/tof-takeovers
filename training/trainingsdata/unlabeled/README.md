@@ -14,6 +14,9 @@ Luca drove past parked cars. This video is intended (!) to be reversed.
 ### autos_1.csv, autos_2.csv, autos_3.csv, autos_4.csv, autos_5.csv, autos_6.csv, autos_7.csv
 Paula drove past parked cars with the sensor orientation reversed. For the sensor it looks like the recorded cars are overtaking.
 
+### autos_senseBox_5FPS.csv
+Benni drove on a bike and Paula overtook him with the senseBox car. The recording is sampled to 5FPS. It just contains a single takeover.
+
 ### auto_reversed.csv
 A single reversed car recording from `autos_7.csv`.
 
