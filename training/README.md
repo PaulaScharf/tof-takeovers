@@ -10,9 +10,9 @@ Use `train_cross_val.py` to train a model with the pkl files from the previous s
 
 To turn the resulting trained tflite model into an array of bytes for running it on a microcontroller use the following command:
 
-`xxd -i models/model_lstm.tflite > models/model_lstm.cc` or `xxd -i models/model_cnn.tflite > models/model_cnn.cc`
+`xxd -i models/model.tflite > model.cc`
 
-In general, the trainings are conducted with early stopping and with a batch size of 64 using an Adam optimizer.
+In general, the trainings are conducted with early stopping and with a batch size of 64 using an Adam optimizer. Performance is evaluated using k-fold Cross-Validation using 10 folds.
 
 #### LSTM
 I tested the following LSTMs structures:
