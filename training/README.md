@@ -6,21 +6,34 @@ The resulting pkl files are normalized to aid the training of the model. The nor
 ---
 
 ## Training the model
-Use either `train_lstm.py` or `train_cnn.py` to train a model with the pkl files from the previous step. To turn the resulting trained tflite model into an array of bytes for running it on a microcontroller use the following command:
+Use `train_cross_val.py` to train a model with the pkl files from the previous step. At the beginning of the file there is a variable `cnn` which lets you switch between the cnn model or the lstm. Check out the function `create_model` to see what kind of model is currently being build. 
+
+To turn the resulting trained tflite model into an array of bytes for running it on a microcontroller use the following command:
 
 `xxd -i models/model_lstm.tflite > models/model_lstm.cc` or `xxd -i models/model_cnn.tflite > models/model_cnn.cc`
 
 In general, the trainings are conducted with early stopping and with a batch size of 64 using an Adam optimizer.
 
 #### LSTM
-The lstm model is structured as follows:
+I tested the following LSTMs structures:
 
-![lstm model](model_lstm.png)
+|   | Model A  | Model B  |
+|---|---|---|
+| Structure  | ![lstm a](models/lstm_10/model.png)  | ![lstm b](models/lstm_32_16/model.png)  |
+| Inference on ESP32S2  | 50ms  | 275ms  |
+| Tensorflow accuracy  | 0.9694 (+- 0.0167)  | 0.9789 (+- 0.0153)  |
+| Tflite accuracy  | 0.7380 (+- 0.0943)  | 0.6940 (+- 0.0745)  |
 
 #### CNN
-The cnn model is structured as follows:
+I tested the following LSTMs structures:
 
-![cnn model](model_cnn.png)
+Performance of Models:
+|   | Model A  | Model B  | Model C  |
+|---|---|---|---|
+| Structure  | ![lstm c](models/cnn_12/model.png)  | ![lstm a](models/cnn_6_3/model.png)  | ![lstm b](models/cnn_12_6_3/model.png)  |
+| Inference on ESP32S2  | 77ms  | 47ms  | 113ms  |
+| Tensorflow accuracy  | 0.9630 (+- 0.0142)  | 0.9592 (+- 0.0247)  | 0.9790 (+- 0.0163)  |
+| Tflite accuracy  | 0.9630 (+- 0.0142)  | 0.9592 (+- 0.0247)  | 0.9790 (+- 0.0163)  |
 
 Currently I can achieve similar accuracies with both the CNN and the LSTM model. Once I convert them to tflite, the LSTM model significantly looses accuracy. Therefor the CNN approach is currently preferred.
 
