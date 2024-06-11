@@ -12,9 +12,9 @@ with open(data_path + 'test_data.pkl', 'rb') as file:
 
 ######################################## ORG MODEL ###################################
 # Modell aufbauen
-model = tf.keras.models.load_model('./training/models/cnn/model.keras')
+model = tf.keras.models.load_model('./training/models/lstm_cross_val/model.keras')
 # Weights laden
-model.load_weights('./training/models/cnn/model_lstm')
+model.load_weights('./training/models/lstm_cross_val/model')
 # Compute accuracy
 metrics = model.evaluate(X_test, y_test, return_dict=True)
 print(metrics)
@@ -25,7 +25,7 @@ print(confusion)
 
 ######################################## TFLITE ###################################
 # Load the TensorFlow Lite model
-interpreter = tf.lite.Interpreter(model_path='./training/models/cnn/model_lstm.tflite')
+interpreter = tf.lite.Interpreter(model_path='./training/models/lstm_cross_val/model.tflite')
 interpreter.allocate_tensors()
 
 # Get input and output tensors

@@ -72,6 +72,10 @@ X = X/2000.0
 # reshape data into 20 frames of 64 pixels each
 X = X.reshape((-1, 20, 64))
 
+#
+with open('./training/trainingsdata/traintestval/all_data.pkl', 'wb') as file:
+    pickle.dump((X, y), file)
+
 # split into train, test and validation
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
