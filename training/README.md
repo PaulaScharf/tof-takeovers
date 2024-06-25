@@ -12,20 +12,20 @@ To turn the resulting trained tflite model into an array of bytes for running it
 
 `xxd -i models/model.tflite > model.cc`
 
-In general, the trainings are conducted with early stopping and with a batch size of 64 using an Adam optimizer. Performance is evaluated using k-fold Cross-Validation using 10 folds.
+In general, the trainings are conducted with early stopping and with a batch size of 64 using an Adam optimizer. Performance is evaluated using k-fold Cross-Validation using 10 folds. The currently utilized trainings / test / validation data is made up of two thirds of sequences without takeovers and one third with takeovers. Almost all of the takeover sequences are "synthetic", meaning they were created by driving past parked cars and reversing the video.
 
 #### LSTM
-I tested the following LSTMs structures:
+I tested the following LSTM structures:
 
-|   | Model A  | Model B  |
-|---|---|---|
-| Structure  | ![lstm a](models/lstm_10/model.png)  | ![lstm b](models/lstm_32_16/model.png)  |
-| Inference on ESP32S2  | 50ms  | 275ms  |
-| Tensorflow accuracy  | 0.9694 (+- 0.0167)  | 0.9789 (+- 0.0153)  |
-| Tflite accuracy  | 0.7380 (+- 0.0943)  | 0.6940 (+- 0.0745)  |
+|   | Model A  | Model B  | Model C  |
+|---|---|---|---|
+| Structure  | ![lstm a](models/lstm_10/model.png)  | ![lstm b](models/lstm_6_3/model.png)  | ![lstm c](models/lstm_32_16/model.png)  |
+| Inference on ESP32S2  | 50ms  | 52ms  | 275ms  |
+| Tensorflow accuracy  | 0.9694 (+- 0.0167)  | 0.9618 (+- 0.0199)  | 0.9789 (+- 0.0153)  |
+| Tflite accuracy  | 0.7380 (+- 0.0943)  | 0.7447 (+- 0.1178)  | 0.6940 (+- 0.0745)  |
 
 #### CNN
-I tested the following LSTMs structures:
+I tested the following CNN structures:
 
 Performance of Models:
 |   | Model A  | Model B  | Model C  |
