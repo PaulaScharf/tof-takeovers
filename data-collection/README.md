@@ -30,10 +30,8 @@ This script is an adjustment of the `vl53l8cx_konfiguration` script. Unlike the 
 ## Option B: record data on sdcards
 
 **Hardware setup:**
-- one senseBox on a bicycle carrier powered by a battery and recording data on a sdcard with the script `data_collection_sdcard`. A wifi network (e.g. through a portable hotspot) is required to give the senseBox the current time and date, to record that for each datapoint. Configure name and password of the wifi network in the `data_collection_sdcard` script.
-- a camera (e.g. a gopro) recording a similar view as the VL53L8CX of the senseBox on a sdcard along with the current date and time
-
-This setup has not been tested yet, but would in theory be more comfortable for data recording
+- one senseBox on a bicycle carrier powered by a battery and recording data on a sdcard with the script `data_collection_sdcard_bluetooth` with the variable `BLUETOOTH` in line one set to false. A wifi network (e.g. through a portable hotspot) is required to give the senseBox the current time and date, to record that for each datapoint. Configure name and password of the wifi network in the `data_collection_sdcard_bluetooth` script.
+- a button connected to the senseBox that the cyclist can press, whenever a car overtakes. If the button is pressed, then a 1 is put as the last entry of each line, otherwise a 0
 
 ## Visualizing the recorded data and prediction in the Processing IDE
 

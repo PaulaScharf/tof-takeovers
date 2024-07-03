@@ -1,30 +1,8 @@
-
-// Dieses Skript stammt aus der vl53l8cx-Library und wurde für diese Arbeit nur angepasst.
-// Das ursprüngliche Skript ist unter folgendem Link zu finden: https://reference.arduino.cc/reference/en/libraries/stm32duino-vl53l8cx/
-
-
-/*
- * To use these examples you need to connect the VL53L8CX satellite sensor directly to the Nucleo board with wires as explained below:
- * pin 1 (SPI_I2C_n) of the VL53L8CX satellite connected to pin GND of the Nucleo board
- * pin 2 (LPn) of the VL53L8CX satellite connected to pin A3 of the Nucleo board
- * pin 3 (NCS) not connected
- * pin 4 (MISO) not connected
- * pin 5 (MOSI_SDA) of the VL53L8CX satellite connected to pin D14 (SDA) of the Nucleo board
- * pin 6 (MCLK_SCL) of the VL53L8CX satellite connected to pin D15 (SCL) of the Nucleo board
- * pin 7 (PWREN) of the VL53L8CX satellite connected to pin D11 of the Nucleo board
- * pin 8 (I0VDD) of the VL53L8CX satellite not connected
- * pin 9 (3V3) of the VL53L8CX satellite connected to 3V3 of the Nucleo board
- * pin 10 (1V8) of the VL53L8CX satellite not connected
- * pin 11 (5V) of the VL53L8CX satellite not connected 
- * GPIO1 of VL53L8CX satellite connected to A2 pin of the Nucleo board (not used)
- * GND of the VL53L8CX satellite connected to GND of the Nucleo board
- */
- 
-/* Includes ------------------------------------------------------------------*/
+#define BLUETOOTH false
 // #include <senseBoxIO.h>
 // #include <Arduino.h>
 #include <Wire.h>
-#include <vl53l8cx_class.h>
+#include <vl53l8cx.h>
 
 #define DEV_I2C Wire
 #define SerialPort Serial
@@ -33,12 +11,11 @@
 #define I2C_RST_PIN -1
 #define PWREN_PIN 2
 
-#include <SD.h>
-#include "SPI.h"
+#define BUTTON_PIN 6
 
-File Data;
-SPIClass sdspi = SPIClass();
-String dataStr = "";
+#include "Freenove_WS2812_Lib_for_ESP32.h"
+#define LED_PIN 1
+Freenove_ESP32_WS2812 led = Freenove_ESP32_WS2812(1, LED_PIN, 0, TYPE_GRB);
 
 void print_result(VL53L8CX_ResultsData *Result);
 void clear_screen(void);
@@ -68,18 +45,52 @@ Adafruit_NeoMatrix RGBMatrix = Adafruit_NeoMatrix(12, 8, PIN,
   NEO_GRB            + NEO_KHZ800);
 
 
-const long intervalInterval = 65;
+const long intervalInterval = 199;
 long time_startInterval = 0;
 long time_actualInterval = 0;
 
+
+#if BLUETOOTH
+#include <SenseBoxBLE.h>
+const char* BLE_CHARACTERISTICS[] = {
+  "B944AF10F4954560968F2F0D18CAB522",
+  "7973afc7e447492ca2376a08c594b302",
+  "7973afc7e447492ca2376a08c594b303",
+  "7973afc7e447492ca2376a08c594b304",
+  "7973afc7e447492ca2376a08c594b305",
+  "7973afc7e447492ca2376a08c594b306",
+  "7973afc7e447492ca2376a08c594b307",
+  "7973afc7e447492ca2376a08c594b308",
+  "7973afc7e447492ca2376a08c594b309",
+  "7973afc7e447492ca2376a08c594b310",
+  "7973afc7e447492ca2376a08c594b311",
+  "7973afc7e447492ca2376a08c594b312",
+  "7973afc7e447492ca2376a08c594b313",
+  "7973afc7e447492ca2376a08c594b314",
+  "7973afc7e447492ca2376a08c594b315",
+  "7973afc7e447492ca2376a08c594b316"
+};
+const int NUM_CHARACTERISTICS = sizeof(BLE_CHARACTERISTICS) / sizeof(BLE_CHARACTERISTICS[0]);
+int distanceCharacteristics[NUM_CHARACTERISTICS];
+#else
+#include <SD.h>
+#include "SPI.h"
+
+File Data;
+SPIClass sdspi = SPIClass();
+String dataStr = "";
+String filename = "Data";
+
 #include "time.h"
-const char* ssid       = "XXX";
-const char* password   = "XXX";
+const char* ssid       = "PaulasHotspot";
+const char* password   = "passwortio";
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 3600;
 const int   daylightOffset_sec = 3600;
 struct tm timeinfo;
 #include <WiFi.h>
+
+#endif
 
 void receiveEvent(int bytes) {
   Serial.print("received: ");
@@ -141,9 +152,17 @@ void setLedColorHSV(int h, double s, double v, int x, int y) {
   RGBMatrix.drawPixel(x+2,y, RGBMatrix.Color(red, green, blue));
 }
 
+void setLED(uint8_t r,uint8_t g,uint8_t b) {
+  led.setLedColorData(0, r, g, b);
+  led.show();
+}
+
 /* Setup ---------------------------------------------------------------------*/
 void setup()
 {
+  led.begin();
+  led.setBrightness(30);  
+  setLED(255,0,0);
   // Initialize serial for output.
   Serial.begin(9600);
   // delay(2000);
@@ -168,7 +187,7 @@ void setup()
   // Configure VL53L8CX component.
   sensor_vl53l8cx_top.begin();
   Serial.println("Sensor library started");
-  sensor_vl53l8cx_top.init_sensor();
+  sensor_vl53l8cx_top.init();
   Serial.println("Sensor initialized");
 
 
@@ -178,7 +197,7 @@ void setup()
   //   snprintf(report, sizeof(report), "vl53l5cx_set_ranging_mode failed, status %u\r\n", status);
   //   SerialPort.print(report);
   // }
-  sensor_vl53l8cx_top.vl53l8cx_set_ranging_frequency_hz(30);
+  sensor_vl53l8cx_top.set_ranging_frequency_hz(30);
    if (status) {
      snprintf(report, sizeof(report), "vl53l8cx_set_ranging_frequency_hz failed, status %u\r\n", status);
      SerialPort.print(report);
@@ -187,7 +206,7 @@ void setup()
   delay(3000);
 
   // Start Measurements
-  sensor_vl53l8cx_top.vl53l8cx_start_ranging();
+  sensor_vl53l8cx_top.start_ranging();
 
   toggle_resolution();
   toggle_signal_and_ambient();
@@ -196,20 +215,40 @@ void setup()
   RGBMatrix.setBrightness(15);
   RGBMatrix.begin();
 
+#if BLUETOOTH
+  // setup bluetooth
+  SenseBoxBLE::start("senseBox-takeover-detection"); // prefix "senseBox" muss bleiben, dahinter kannst du es auch anders benennen
+  SenseBoxBLE::addService("CF06A218F68EE0BEAD048EBC1EB0BC84");
+  for (int i = 0; i < NUM_CHARACTERISTICS; i++) {
+    SenseBoxBLE::addService(BLE_CHARACTERISTICS[i]);
+    distanceCharacteristics[i] = SenseBoxBLE::addCharacteristic(BLE_CHARACTERISTICS[i]);
+  }
+  Serial.println("bluetooth successfully setup");
+#else
   //connect to WiFi
   Serial.printf("Connecting to %s ", ssid);
   WiFi.begin(ssid, password);
+  int maxAttempts = 50;
+  int currentAttempt = 0;
   while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       Serial.print(".");
+      currentAttempt = currentAttempt + 1;
+      if(currentAttempt>maxAttempts) {
+        break;
+      }
   }
-  Serial.println(" CONNECTED");
-  
-  //init and get the time
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-  if(!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
-    return;
+  if(currentAttempt<=maxAttempts) {
+    Serial.println(" CONNECTED");
+    
+    //init and get the time
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    if(!getLocalTime(&timeinfo)){
+      Serial.println("Failed to obtain time");
+      return;
+    }
+    setLED(0,255,0);
+    delay(500);
   }
 
   //disconnect WiFi as it's no longer needed
@@ -221,10 +260,15 @@ void setup()
   digitalWrite(SD_ENABLE,LOW);
   sdspi.begin(VSPI_SCLK,VSPI_MISO,VSPI_MOSI,VSPI_SS);
   SD.begin(VSPI_SS,sdspi);
-  Data = SD.open("/" + String(timeinfo.tm_yday,DEC)+String(timeinfo.tm_hour,DEC)+String(timeinfo.tm_min,DEC)+String(timeinfo.tm_sec,DEC)+ ".txt", FILE_WRITE);
+  filename = String(timeinfo.tm_yday,DEC)+String(timeinfo.tm_hour,DEC)+String(timeinfo.tm_min,DEC)+String(timeinfo.tm_sec,DEC);
+  Data = SD.open("/" + filename + ".txt", FILE_WRITE);
   Data.close();
+#endif
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
 
   Serial.println("Success");
+
+  setLED(0,0,0);
 }
 
 void loop()
@@ -240,11 +284,11 @@ void loop()
     uint8_t status;
 
     do {
-      status = sensor_vl53l8cx_top.vl53l8cx_check_data_ready(&NewDataReady);
+      status = sensor_vl53l8cx_top.check_data_ready(&NewDataReady);
     } while (!NewDataReady);
 
     if ((!status) && (NewDataReady != 0)) {
-      status = sensor_vl53l8cx_top.vl53l8cx_get_ranging_data(&Results);
+      status = sensor_vl53l8cx_top.get_ranging_data(&Results);
       print_result(&Results);
 
       // Uncomment to display actual measurement rate
@@ -254,7 +298,10 @@ void loop()
       // Serial.print(measurements/measurementTime, 3);
       // Serial.println("Hz");
     }
-  }  
+  } 
+  #if BLUETOOTH
+    SenseBoxBLE::poll();
+  #endif 
 }
 
 void print_result(VL53L8CX_ResultsData *Result)
@@ -264,7 +311,15 @@ void print_result(VL53L8CX_ResultsData *Result)
   uint8_t number_of_zones = res;
 
   zones_per_line = (number_of_zones == 16) ? 4 : 8;
-  dataStr = String(timeinfo.tm_hour,DEC)+":"+String(timeinfo.tm_min,DEC)+":"+String(timeinfo.tm_sec,DEC)+"."+String(millis()-measurementStartTime, 6) + ",";
+
+#if BLUETOOTH
+  int index = 0;
+  int characteristic = 0;
+  int begin_index = 0;
+  float save_data[64] = {0.0};
+#else
+  dataStr = "";
+#endif
 
   for (j = 0; j < number_of_zones; j += zones_per_line)
   {
@@ -274,10 +329,35 @@ void print_result(VL53L8CX_ResultsData *Result)
       {
         //perform data processing here...
         if((long)Result->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l] ==255){
-          dataStr += String(5000) + ";";
+#if BLUETOOTH
+          save_data[begin_index] = 0;
+          index = index+1;
+          if(index>=4) {
+            bool isConnected = SenseBoxBLE::write(distanceCharacteristics[characteristic++], save_data[begin_index], save_data[begin_index-1], save_data[begin_index-2], save_data[begin_index-3]);
+            index = 0;
+          }
+          begin_index = begin_index + 1;
+#else
+          dataStr += String(0) + ",";
+#endif
           RGBMatrix.drawPixel((j+1)/8+2, k, RGBMatrix.Color(150, 150, 150));
         } else {
-          dataStr += String((long)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]) + ";";
+#if BLUETOOTH
+          save_data[begin_index] = (float)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l];
+          Serial.print((float)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]);
+          Serial.print(" ");
+          Serial.print(save_data[begin_index]);
+          Serial.print(" ");
+          Serial.println(begin_index);
+          index = index+1;
+          if(index>=4) {
+            bool isConnected = SenseBoxBLE::write(distanceCharacteristics[characteristic++], save_data[begin_index], save_data[begin_index-1], save_data[begin_index-2], save_data[begin_index-3]);
+            index = 0;
+          }
+          begin_index = begin_index + 1;
+#else
+          dataStr += String((long)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]) + ",";
+#endif
           long distance = (long)Result->distance_mm[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l];
           int maxDist = distance;
           if (maxDist > 1000) {
@@ -286,23 +366,27 @@ void print_result(VL53L8CX_ResultsData *Result)
           int colVal = map(maxDist,0,2000,10,310);
           setLedColorHSV(colVal,1,1,(j+1)/8, k);
         }
-        // dataStr += String((long)Result->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]) + ",";
-        // dataStr += String((long)Result->signal_per_spad[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]) + ",";
-        // dataStr += String((long)Result->ambient_per_spad[j+k]) + "; ";
+        // dataStr += String((long)Result->target_status[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]) + ";";
+        // dataStr += String((long)Result->signal_per_spad[(VL53L8CX_NB_TARGET_PER_ZONE * (j+k)) + l]) + ";";
+        // dataStr += String((long)Result->ambient_per_spad[j+k]) + ", ";
       }
     }
   }
-  dataStr += "\n";
+
+#if not BLUETOOTH
+  getLocalTime(&timeinfo);
+  dataStr += String(timeinfo.tm_hour,DEC)+":"+String(timeinfo.tm_min,DEC)+":"+String(timeinfo.tm_sec,DEC)+"."+String(millis()-measurementStartTime, 6) + "," + String(1-digitalRead(BUTTON_PIN)) + "\n";
   // Serial.print(dataStr);
-  Data = SD.open("/Data.txt", FILE_APPEND);
+  Data = SD.open("/" + filename + ".txt", FILE_APPEND);
   Data.print(dataStr);
   Data.close();
+#endif
   RGBMatrix.show();
 }
 
 void toggle_resolution(void)
 {
-  sensor_vl53l8cx_top.vl53l8cx_stop_ranging();
+  sensor_vl53l8cx_top.stop_ranging();
 
   switch (res)
   {
@@ -317,8 +401,8 @@ void toggle_resolution(void)
     default:
       break;
   }
-  sensor_vl53l8cx_top.vl53l8cx_set_resolution(res);
-  sensor_vl53l8cx_top.vl53l8cx_start_ranging();
+  sensor_vl53l8cx_top.set_resolution(res);
+  sensor_vl53l8cx_top.start_ranging();
 }
 
 void toggle_signal_and_ambient(void)
