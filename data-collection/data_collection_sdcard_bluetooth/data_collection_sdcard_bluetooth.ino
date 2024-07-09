@@ -81,14 +81,15 @@ SPIClass sdspi = SPIClass();
 String dataStr = "";
 String filename = "Data";
 
-#include "time.h"
+#include <WiFi.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+#include <ESP32Time.h>
 const char* ssid       = "PaulasHotspot";
 const char* password   = "passwortio";
-const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 3600;
-const int   daylightOffset_sec = 3600;
-struct tm timeinfo;
-#include <WiFi.h>
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
+ESP32Time rtc;
 
 #endif
 
@@ -191,6 +192,15 @@ void setup()
   Serial.println("Sensor initialized");
 
 
+
+  // Hier kann der Ranging Mode gesetzt werden
+  // sensor_vl53l8cx_top.vl53l8cx_set_ranging_mode(VL53L8CX_RANGING_MODE_AUTONOMOUS);
+  // if (status) {
+  //   snprintf(report, sizeof(report), "vl53l5cx_set_ranging_mode failed, status %u\r\n", status);
+  //   SerialPort.print(report);
+  // }
+  
+
   // Hier kann der Ranging Mode gesetzt werden
   // sensor_vl53l8cx_top.vl53l8cx_set_ranging_mode(VL53L8CX_RANGING_MODE_AUTONOMOUS);
   // if (status) {
@@ -198,10 +208,7 @@ void setup()
   //   SerialPort.print(report);
   // }
   sensor_vl53l8cx_top.set_ranging_frequency_hz(30);
-   if (status) {
-     snprintf(report, sizeof(report), "vl53l8cx_set_ranging_frequency_hz failed, status %u\r\n", status);
-     SerialPort.print(report);
-   }
+  sensor_vl53l8cx_top.set_resolution(VL53L8CX_RESOLUTION_8X8);
   Serial.println("ranging mode and frequency was set");
   delay(3000);
 
@@ -242,11 +249,9 @@ void setup()
     Serial.println(" CONNECTED");
     
     //init and get the time
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-    if(!getLocalTime(&timeinfo)){
-      Serial.println("Failed to obtain time");
-      return;
-    }
+    timeClient.begin();
+    timeClient.update();
+    rtc.setTime(timeClient.getEpochTime());
     setLED(0,255,0);
     delay(500);
   }
@@ -260,7 +265,7 @@ void setup()
   digitalWrite(SD_ENABLE,LOW);
   sdspi.begin(VSPI_SCLK,VSPI_MISO,VSPI_MOSI,VSPI_SS);
   SD.begin(VSPI_SS,sdspi);
-  filename = String(timeinfo.tm_yday,DEC)+String(timeinfo.tm_hour,DEC)+String(timeinfo.tm_min,DEC)+String(timeinfo.tm_sec,DEC);
+  filename = rtc.getTime("%F_%H-%M-%S");
   Data = SD.open("/" + filename + ".txt", FILE_WRITE);
   Data.close();
 #endif
@@ -374,8 +379,8 @@ void print_result(VL53L8CX_ResultsData *Result)
   }
 
 #if not BLUETOOTH
-  getLocalTime(&timeinfo);
-  dataStr += String(timeinfo.tm_hour,DEC)+":"+String(timeinfo.tm_min,DEC)+":"+String(timeinfo.tm_sec,DEC)+"."+String(millis()-measurementStartTime, 6) + "," + String(1-digitalRead(BUTTON_PIN)) + "\n";
+  Serial.println(String(1-digitalRead(BUTTON_PIN)));
+  dataStr += rtc.getTime("%H:%M:%S")+"."+String(millis()-measurementStartTime, 6) + "," + String(1-digitalRead(BUTTON_PIN)) + "\n";
   // Serial.print(dataStr);
   Data = SD.open("/" + filename + ".txt", FILE_APPEND);
   Data.print(dataStr);
