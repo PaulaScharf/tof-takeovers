@@ -85,8 +85,8 @@ String filename = "Data";
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <ESP32Time.h>
-const char* ssid       = "PaulasHotspot";
-const char* password   = "passwortio";
+const char* ssid       = "XXX";
+const char* password   = "XXX";
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 ESP32Time rtc;
